@@ -42,12 +42,41 @@ function init() {
   const iconCount =
     Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
 
+  const image = document.createElement("img");
+  image.src = "img/luigi.png";
+  image.width = 60;
+  image.height = 77;
+  image.className = "animated-icon";
+  document.body.appendChild(image);
+
   for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "img/luigi.png";
+    image.src = "img/wario.png";
+    image.width = 60;
+    image.height = 64;
     image.className = "animated-icon";
     document.body.appendChild(image);
   }
+
+  for (let i = 0; i < iconCount; i++) {
+    const image = document.createElement("img");
+    image.src = "img/mario.png";
+    image.width = 60;
+    image.height = 69;
+    image.className = "animated-icon";
+    document.body.appendChild(image);
+  }
+
+  /*
+  for (let i = 0; i < iconCount; i++) {
+    const image = document.createElement("img");
+    image.src = "img/yoshi.png";
+    image.width = 60;
+    image.height = 83;
+    image.className = "animated-icon";
+    document.body.appendChild(image);
+  }
+  */
 
   // Initialize multiple icons and animate them
   const icons = Array.from(document.querySelectorAll(".animated-icon")).map(
