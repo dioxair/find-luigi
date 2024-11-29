@@ -124,5 +124,10 @@ function animateAll(time) {
   requestAnimationFrame(animateAll);
 }
 
-init();
-requestAnimationFrame(animateAll);
+function start() {
+  document.getElementById("startButton").style.visibility = "hidden";
+  document.getElementById("music").play();
+
+  init();
+  requestAnimationFrame(animateAll);
+}
