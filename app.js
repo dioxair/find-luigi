@@ -5,8 +5,8 @@ class AnimatedIcon {
     this.initialY = y;
     this.dx = dx;
     this.dy = dy;
-    // Threshold for updating the DOM only if there's a noticeable change (default 1 pixel)
-    this.movementThreshold = 1;
+    // Threshold for updating the DOM only if there's a noticeable change
+    this.movementThreshold = 5;
     this.width = element.offsetWidth;
     this.height = element.offsetHeight;
 
@@ -16,16 +16,21 @@ class AnimatedIcon {
     this.lastX = x;
     this.lastY = y;
 
+    // Interpolated positions (only used for smoothing)
+    this.currentX = x;
+    this.currentY = y;
+
     this.applyInitialPosition();
   }
 
   applyInitialPosition() {
     this.element.style.transform = `translate(${this.initialX}px, ${this.initialY}px)`;
-    this.element.style.visibility = "visible"; // Show the element after positioning
+    // Show the element after positioning
+    this.element.style.visibility = "visible";
   }
 
   updatePosition(time) {
-    const elapsed = (time - this.lastUpdate) / 1000; // Elapsed time in seconds
+    const elapsed = (time - this.lastUpdate) / 1000;
     const newX = this.initialX + this.dx * elapsed;
     const newY = this.initialY + this.dy * elapsed;
 
@@ -47,6 +52,15 @@ class AnimatedIcon {
     ) {
       this.lastX = this.initialX;
       this.lastY = this.initialY;
+    }
+
+    if (this.movementThreshold > 3) {
+      const smoothingFactor = 0.1;
+      this.currentX += (this.lastX - this.currentX) * smoothingFactor;
+      this.currentY += (this.lastY - this.currentY) * smoothingFactor;
+
+      this.element.style.transform = `translate(${this.currentX}px, ${this.currentY}px)`;
+    } else {
       this.element.style.transform = `translate(${this.lastX}px, ${this.lastY}px)`;
     }
 
