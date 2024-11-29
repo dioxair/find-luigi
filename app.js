@@ -68,7 +68,7 @@ function init() {
   /*
   for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "img/mario.png";
+    image.src = "img/yoshi.png";
     image.width = 60;
     image.height = 83;
     image.className = "animated-icon";
