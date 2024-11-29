@@ -5,7 +5,6 @@ class AnimatedIcon {
     this.initialY = y;
     this.dx = dx;
     this.dy = dy;
-
     // Threshold for updating the DOM only if there's a noticeable change (default 1 pixel)
     this.movementThreshold = 1;
     this.width = element.offsetWidth;
@@ -89,6 +88,17 @@ function init() {
     image.className = "animated-icon";
     fragment.appendChild(image);
   }
+
+  /*
+  for (let i = 0; i < iconCount; i++) {
+    const image = document.createElement("img");
+    image.src = "assets/img/yoshi.png";
+    image.width = 60;
+    image.height = 83;
+    image.className = "animated-icon";
+    fragment.appendChild(image);
+  }
+  */
 
   document.body.appendChild(fragment);
 
