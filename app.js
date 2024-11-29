@@ -6,7 +6,7 @@ class AnimatedIcon {
     this.dx = dx;
     this.dy = dy;
     // Threshold for updating the DOM only if there's a noticeable change
-    this.movementThreshold = 5;
+    this.movementThreshold = 1;
     this.width = element.offsetWidth;
     this.height = element.offsetHeight;
 
@@ -108,7 +108,8 @@ function init() {
 
   icons = Array.from(document.querySelectorAll(".animated-icon")).map(
     (icon) => {
-      const randomX = Math.random() * (window.innerWidth - 60); // Prevent overflow
+      // Prevent going out of bounds
+      const randomX = Math.random() * (window.innerWidth - 60);
       const randomY = Math.random() * (window.innerHeight - 70);
       const randomDx = (Math.random() - 0.5) * 200;
       const randomDy = (Math.random() - 0.5) * 200;
