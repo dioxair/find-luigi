@@ -71,34 +71,24 @@ function init() {
   image.className = "animated-icon";
   fragment.appendChild(image);
 
-  for (let i = 0; i < iconCount; i++) {
-    const image = document.createElement("img");
-    image.src = "assets/img/wario.png";
-    image.width = 60;
-    image.height = 64;
-    image.className = "animated-icon";
-    fragment.appendChild(image);
-  }
+  const characters = [
+    { src: "assets/img/luigi.png", width: 60, height: 77 },
+    { src: "assets/img/mario.png", width: 60, height: 69 },
+    { src: "assets/img/wario.png", width: 60, height: 64 },
+    // { src: "assets/img/yoshi.png", width: 60, height: 83 },
+  ];
 
-  for (let i = 0; i < iconCount; i++) {
-    const image = document.createElement("img");
-    image.src = "assets/img/mario.png";
-    image.width = 60;
-    image.height = 69;
-    image.className = "animated-icon";
-    fragment.appendChild(image);
-  }
+  for (let i = 0; i < iconCount * characters.length; i++) {
+    const character = characters[Math.floor(i / iconCount)];
+    if (character.src.includes("luigi")) continue;
 
-  /*
-  for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "assets/img/yoshi.png";
-    image.width = 60;
-    image.height = 83;
+    image.src = character.src;
+    image.width = character.width;
+    image.height = character.height;
     image.className = "animated-icon";
     fragment.appendChild(image);
   }
-  */
 
   document.body.appendChild(fragment);
 
