@@ -41,7 +41,7 @@ function init() {
   const fragment = document.createDocumentFragment();
 
   const image = document.createElement("img");
-  image.src = "img/luigi.png";
+  image.src = "assets/img/luigi.png";
   image.width = 60;
   image.height = 77;
   image.className = "animated-icon";
@@ -49,7 +49,7 @@ function init() {
 
   for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "img/wario.png";
+    image.src = "assets/img/wario.png";
     image.width = 60;
     image.height = 64;
     image.className = "animated-icon";
@@ -58,7 +58,7 @@ function init() {
 
   for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "img/mario.png";
+    image.src = "assets/img/mario.png";
     image.width = 60;
     image.height = 69;
     image.className = "animated-icon";
@@ -68,7 +68,7 @@ function init() {
   /*
   for (let i = 0; i < iconCount; i++) {
     const image = document.createElement("img");
-    image.src = "img/yoshi.png";
+    image.src = "assets/img/yoshi.png";
     image.width = 60;
     image.height = 83;
     image.className = "animated-icon";
