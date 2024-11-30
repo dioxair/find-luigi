@@ -4,11 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Find Luigi</title>
-    <link rel="stylesheet" href="style.css" />
-    <script defer src="app.js"></script>
+    <link rel="stylesheet" href="styles/style.css" />
+    <script defer src="scripts/app.js"></script>
   </head>
   <body>
     <button id="startButton" onclick="start()">Click to start</button>
     <audio id="music" src="assets/music.mp3" loop></audio>
+
+    <div id="game"></div>
+
+    <h1 id="settings">Settings</h1>
+    <div id="settings">
+      <label>
+        Movement Threshold
+        <input
+          type="text"
+          placeholder="Movement threshold"
+          value="1"
+          id="movementThresholdField"
+        />
+      </label>
+      <label>
+        Example
+        <button>Example button</button>
+      </label>
+      <label>
+        Example
+        <button>Example button</button>
+      </label>
+      <label>
+        Example
+        <button>Example button</button>
+      </label>
+      <label>
+        Example
+        <button>Example button</button>
+      </label>
+      <label>
+        Example
+        <button>Example button</button>
+      </label>
+    </div>
   </body>
 </html>
