@@ -15,6 +15,7 @@
 
     <h1 id="settings">Settings</h1>
     <div id="settings">
+      <!-- TODO: Explaination for what the fuck this does -->
       <label>
         Movement Threshold
         <input
@@ -24,26 +25,20 @@
           id="movementThresholdField"
         />
       </label>
-      <label>
-        Example
-        <button>Example button</button>
+      <label id="speedFieldLabel">
+        Speed (value: 200)
+        <input
+          type="range"
+          id="speedField"
+          value="200"
+          step="50"
+          min="50"
+          max="1000"
+        />
       </label>
-      <label>
-        Example
-        <button>Example button</button>
-      </label>
-      <label>
-        Example
-        <button>Example button</button>
-      </label>
-      <label>
-        Example
-        <button>Example button</button>
-      </label>
-      <label>
-        Example
-        <button>Example button</button>
-      </label>
+      <button id="applySettingsButton" onclick="applySettings()">
+        Apply settings
+      </button>
     </div>
   </body>
 </html>

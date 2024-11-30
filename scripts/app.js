@@ -1,3 +1,23 @@
+// Settings
+let movementThreshold = 1;
+let speed = 200;
+
+const movementThresholdField = document.getElementById(
+  "movementThresholdField",
+);
+const speedField = document.getElementById("speedField");
+
+speedField.addEventListener("input", function () {
+  const speedFieldLabel = document.getElementById("speedFieldLabel");
+  speedFieldLabel.childNodes[0].textContent = `Speed (value: ${speedField.value})`;
+  speed = speedField.value;
+});
+
+function applySettings() {
+  movementThreshold = movementThresholdField.value;
+  speed = speedField.value;
+}
+
 window.addEventListener("load", function () {
   // make game window non-responsive
   const game = document.getElementById("game");
@@ -26,7 +46,6 @@ class AnimatedIcon {
     this.dx = dx;
     this.dy = dy;
     this.gameElement = gameElement;
-    this.movementThreshold = 1;
     this.width = element.offsetWidth;
     this.height = element.offsetHeight;
 
@@ -69,14 +88,14 @@ class AnimatedIcon {
     this.initialY += this.dy * elapsed;
 
     if (
-      Math.abs(this.initialX - this.lastX) > this.movementThreshold ||
-      Math.abs(this.initialY - this.lastY) > this.movementThreshold
+      Math.abs(this.initialX - this.lastX) > movementThreshold ||
+      Math.abs(this.initialY - this.lastY) > movementThreshold
     ) {
       this.lastX = this.initialX;
       this.lastY = this.initialY;
     }
 
-    if (this.movementThreshold > 3) {
+    if (movementThreshold > 3) {
       const smoothingFactor = 0.1;
       this.currentX += (this.lastX - this.currentX) * smoothingFactor;
       this.currentY += (this.lastY - this.currentY) * smoothingFactor;
@@ -131,8 +150,8 @@ function init() {
     (icon) => {
       const randomX = Math.random() * (game.offsetWidth - 60);
       const randomY = Math.random() * (game.offsetHeight - 70);
-      const randomDx = (Math.random() - 0.5) * 200;
-      const randomDy = (Math.random() - 0.5) * 200;
+      const randomDx = (Math.random() - 0.5) * speed;
+      const randomDy = (Math.random() - 0.5) * speed;
 
       return new AnimatedIcon(icon, randomX, randomY, randomDx, randomDy, game);
     },
