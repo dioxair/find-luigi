@@ -1,45 +1,28 @@
-// Settings
-let movementThreshold = 1;
-let speed = 200;
-
-const movementThresholdField = document.getElementById(
-  "movementThresholdField",
-);
-const speedField = document.getElementById("speedField");
-
-speedField.addEventListener("input", function () {
-  const speedFieldLabel = document.getElementById("speedFieldLabel");
-  speedFieldLabel.childNodes[0].textContent = `Speed (value: ${speedField.value})`;
-  speed = speedField.value;
-});
-
-function applySettings() {
-  movementThreshold = movementThresholdField.value;
-  speed = speedField.value;
-}
-
-window.addEventListener("load", function () {
-  // make game window non-responsive
-  const game = document.getElementById("game");
-
-  const initialWidth = game.offsetWidth;
-  const initialHeight = game.offsetHeight;
-
-  game.style.width = `${initialWidth}px`;
-  game.style.height = `${initialHeight}px`;
-  game.style.minWidth = `${initialWidth}px`;
-  game.style.minHeight = `${initialHeight}px`;
-
-  window.addEventListener("resize", function () {
-    game.style.width = `${initialWidth}px`;
-    game.style.height = `${initialHeight}px`;
-    game.style.minWidth = `${initialWidth}px`;
-    game.style.minHeight = `${initialHeight}px`;
-  });
-});
+import * as settings from "./settings"
 
 class AnimatedIcon {
-  constructor(element, x = 0, y = 0, dx = 2, dy = 2, gameElement) {
+  element: HTMLImageElement;
+  initialX: number;
+  initialY: number;
+  dx: number;
+  dy: number;
+  gameElement: HTMLDivElement;
+  width: number;
+  height: number;
+  lastUpdate: number;
+  lastX: number;
+  lastY: number;
+  currentX: number;
+  currentY: number;
+
+  constructor(
+    element: HTMLImageElement,
+    x = 0,
+    y = 0,
+    dx = 2,
+    dy = 2,
+    gameElement: HTMLDivElement
+  ) {
     this.element = element;
     this.initialX = x;
     this.initialY = y;
@@ -65,7 +48,7 @@ class AnimatedIcon {
     this.element.style.visibility = "visible";
   }
 
-  updatePosition(time) {
+  updatePosition(time: number) {
     const elapsed = (time - this.lastUpdate) / 1000;
 
     const gameRect = this.gameElement.getBoundingClientRect();
@@ -88,14 +71,14 @@ class AnimatedIcon {
     this.initialY += this.dy * elapsed;
 
     if (
-      Math.abs(this.initialX - this.lastX) > movementThreshold ||
-      Math.abs(this.initialY - this.lastY) > movementThreshold
+      Math.abs(this.initialX - this.lastX) > settings.movementThreshold ||
+      Math.abs(this.initialY - this.lastY) > settings.movementThreshold
     ) {
       this.lastX = this.initialX;
       this.lastY = this.initialY;
     }
 
-    if (movementThreshold > 3) {
+    if (settings.movementThreshold > 3) {
       const smoothingFactor = 0.1;
       this.currentX += (this.lastX - this.currentX) * smoothingFactor;
       this.currentY += (this.lastY - this.currentY) * smoothingFactor;
@@ -108,25 +91,26 @@ class AnimatedIcon {
   }
 }
 
-let icons = [];
 
-function init() {
+let icons: AnimatedIcon[] = [];
+
+export function init() {
   const minIcons = 50;
   const maxIcons = 100;
   const iconCount =
     Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
 
   const fragment = document.createDocumentFragment();
-  const game = document.getElementById("game");
+  const gameWindow: HTMLDivElement = document.getElementById("game") as HTMLDivElement;
 
   const characters = [
-    { src: "assets/img/luigi.png", width: 60, height: 77 },
-    { src: "assets/img/mario.png", width: 60, height: 69 },
-    { src: "assets/img/wario.png", width: 60, height: 64 },
+    { src: "img/luigi.png", width: 60, height: 77 },
+    { src: "img/mario.png", width: 60, height: 69 },
+    { src: "img/wario.png", width: 60, height: 64 },
   ];
 
   const image = document.createElement("img");
-  image.src = "assets/img/luigi.png";
+  image.src = "img/luigi.png";
   image.width = 60;
   image.height = 77;
   image.className = "animated-icon";
@@ -144,29 +128,21 @@ function init() {
     fragment.appendChild(image);
   }
 
-  game.appendChild(fragment);
+  gameWindow.appendChild(fragment);
 
-  icons = Array.from(document.querySelectorAll(".animated-icon")).map(
+  icons = Array.from(document.querySelectorAll(".animated-icon") as NodeListOf<HTMLImageElement>).map(
     (icon) => {
-      const randomX = Math.random() * (game.offsetWidth - 60);
-      const randomY = Math.random() * (game.offsetHeight - 70);
-      const randomDx = (Math.random() - 0.5) * speed;
-      const randomDy = (Math.random() - 0.5) * speed;
+      const randomX = Math.random() * (gameWindow.offsetWidth - 60);
+      const randomY = Math.random() * (gameWindow.offsetHeight - 70);
+      const randomDx = (Math.random() - 0.5) * settings.speed;
+      const randomDy = (Math.random() - 0.5) * settings.speed;
 
-      return new AnimatedIcon(icon, randomX, randomY, randomDx, randomDy, game);
+      return new AnimatedIcon(icon, randomX, randomY, randomDx, randomDy, gameWindow);
     },
   );
 }
 
-function animateAll(time) {
+export function animateAll(time: number) {
   icons.forEach((icon) => icon.updatePosition(time));
-  requestAnimationFrame(animateAll);
-}
-
-function start() {
-  document.getElementById("startButton").style.visibility = "hidden";
-  document.getElementById("music").play();
-
-  init();
   requestAnimationFrame(animateAll);
 }
