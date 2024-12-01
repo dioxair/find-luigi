@@ -8,6 +8,6 @@ This is currently a very bare-bones implementation of the minigame. I'll probabl
 ## TO-DO LIST:
 - Add one of those info icons with a cool popup to explain some settings
 - Add a setting for shuffling layers of characters
-- Migrate project to using Node.js and Typescript
+- ~~Migrate project to using Node.js and Typescript~~
 
 <sub>`I do not claim ownership of any content used in this material. All rights belong to their respective owners. No copyright infringement intended`</sub>
