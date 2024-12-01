@@ -12,6 +12,17 @@ const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
   "shuffleLayersCheckbox",
 ) as HTMLInputElement;
 
+speedField.addEventListener("input", function () {
+  const speedValue = parseFloat(speedField.value);
+  if (!isNaN(speedValue)) {
+    const speedFieldLabel: HTMLLabelElement = document.getElementById(
+      "speedFieldLabel",
+    ) as HTMLLabelElement;
+    speedFieldLabel.childNodes[0].textContent = `Speed (value: ${speedField.value})`;
+    speed = speedValue;
+  }
+});
+
 export function applySettings() {
   const movementThresholdValue = parseFloat(movementThresholdField.value);
   const speedValue = parseFloat(speedField.value);
