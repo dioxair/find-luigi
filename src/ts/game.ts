@@ -1,4 +1,4 @@
-import * as settings from "./settings"
+import * as settings from "./settings";
 
 class AnimatedIcon {
   element: HTMLImageElement;
@@ -21,7 +21,7 @@ class AnimatedIcon {
     y = 0,
     dx = 2,
     dy = 2,
-    gameElement: HTMLDivElement
+    gameElement: HTMLDivElement,
   ) {
     this.element = element;
     this.initialX = x;
@@ -91,7 +91,6 @@ class AnimatedIcon {
   }
 }
 
-
 let icons: AnimatedIcon[] = [];
 
 export function init() {
@@ -101,7 +100,9 @@ export function init() {
     Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
 
   const fragment = document.createDocumentFragment();
-  const gameWindow: HTMLDivElement = document.getElementById("game") as HTMLDivElement;
+  const gameWindow: HTMLDivElement = document.getElementById(
+    "game",
+  ) as HTMLDivElement;
 
   const characters = [
     { src: "img/luigi.png", width: 60, height: 77 },
@@ -116,6 +117,8 @@ export function init() {
   image.className = "animated-icon";
   fragment.appendChild(image);
 
+  const images: HTMLImageElement[] = [];
+
   for (let i = 0; i < iconCount * characters.length; i++) {
     const character = characters[Math.floor(i / iconCount)];
     if (character.src.includes("luigi")) continue;
@@ -125,21 +128,43 @@ export function init() {
     image.width = character.width;
     image.height = character.height;
     image.className = "animated-icon";
-    fragment.appendChild(image);
+
+    if (settings.shuffleCharacterLayers) {
+      images.push(image);
+    } else {
+      fragment.appendChild(image);
+    }
+  }
+
+  if (settings.shuffleCharacterLayers) {
+    // Fisher-Yates Shuffle
+    for (let i = images.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [images[i], images[j]] = [images[j], images[i]];
+    }
+
+    images.forEach((image) => fragment.appendChild(image));
   }
 
   gameWindow.appendChild(fragment);
 
-  icons = Array.from(document.querySelectorAll(".animated-icon") as NodeListOf<HTMLImageElement>).map(
-    (icon) => {
-      const randomX = Math.random() * (gameWindow.offsetWidth - 60);
-      const randomY = Math.random() * (gameWindow.offsetHeight - 70);
-      const randomDx = (Math.random() - 0.5) * settings.speed;
-      const randomDy = (Math.random() - 0.5) * settings.speed;
+  icons = Array.from(
+    document.querySelectorAll(".animated-icon") as NodeListOf<HTMLImageElement>,
+  ).map((icon) => {
+    const randomX = Math.random() * (gameWindow.offsetWidth - 60);
+    const randomY = Math.random() * (gameWindow.offsetHeight - 70);
+    const randomDx = (Math.random() - 0.5) * settings.speed;
+    const randomDy = (Math.random() - 0.5) * settings.speed;
 
-      return new AnimatedIcon(icon, randomX, randomY, randomDx, randomDy, gameWindow);
-    },
-  );
+    return new AnimatedIcon(
+      icon,
+      randomX,
+      randomY,
+      randomDx,
+      randomDy,
+      gameWindow,
+    );
+  });
 }
 
 export function animateAll(time: number) {
