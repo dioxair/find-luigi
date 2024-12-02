@@ -105,13 +105,13 @@ export function init() {
   ) as HTMLDivElement;
 
   const characters = [
-    { src: "img/luigi.png", width: 60, height: 77 },
-    { src: "img/mario.png", width: 60, height: 69 },
-    { src: "img/wario.png", width: 60, height: 64 },
+    { src: "img/character/luigi.png", width: 60, height: 77 },
+    { src: "img/character/mario.png", width: 60, height: 69 },
+    { src: "img/character/wario.png", width: 60, height: 64 },
   ];
 
   const image = document.createElement("img");
-  image.src = "img/luigi.png";
+  image.src = "img/character/luigi.png";
   image.width = 60;
   image.height = 77;
   image.className = "animated-icon";
