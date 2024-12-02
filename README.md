@@ -8,6 +8,7 @@ This is currently a very bare-bones implementation of the minigame. I'll probabl
 ## TO-DO LIST:
 - Wanted! game mechanics (different layouts, **clicking on Luigi to progress!!!**)
 - Add one of those info icons with a cool popup to explain some settings
+- Settings auto update when they're changed
 - ~~Add a setting for shuffling layers of characters~~
 - ~~Migrate project to using Node.js and Typescript~~
 
