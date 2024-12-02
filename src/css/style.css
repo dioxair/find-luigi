@@ -85,3 +85,15 @@ body {
   font-size: 1rem;
   color: #ecf0f1;
 }
+
+#settings label span {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.label-info-icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}

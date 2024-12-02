@@ -17,11 +17,23 @@
     <div id="settings">
       <!-- TODO: Explaination for what the fuck these settings do -->
       <label>
-        Shuffle character layers
+        <span>
+          Shuffle character layers
+          <img
+            src="info-icon.svg"
+            title="Shuffles image layers to make sure that not all Wario's are on top of Mario's, not all Mario's are on top of Wario's, etc."
+            class="label-info-icon"
+        /></span>
         <input type="checkbox" checked="true" id="shuffleLayersCheckbox" />
       </label>
       <label>
-        Movement Threshold
+        <span>
+          Movement threshold
+          <img
+            src="info-icon.svg"
+            title="How many pixels a character must move before updating"
+            class="label-info-icon"
+        /></span>
         <input
           type="text"
           placeholder="Input number"
