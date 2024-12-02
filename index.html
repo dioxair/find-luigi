@@ -53,6 +53,44 @@
           id="movementThresholdField"
         />
       </label>
+      <label>
+        <span>
+          Minimum characters
+          <img
+            src="img/info-icon.svg"
+            title="Minimum amount of character that can appear on screen"
+            class="label-info-icon"
+        /></span>
+        <input
+          type="text"
+          placeholder="Input number"
+          value="50"
+          min="1"
+          max="500"
+          oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null"
+          id="minimumIconsField"
+        />
+      </label>
+      <label>
+        <span>
+          Maximum characters
+          <img
+            src="img/info-icon.svg"
+            title="Maximum amount of character that can appear on screen"
+            class="label-info-icon"
+        /></span>
+        <input
+          type="text"
+          placeholder="Input number"
+          value="100"
+          min="1"
+          max="500"
+          oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null"
+          id="maximumIconsField"
+        />
+      </label>
       <label id="speedFieldLabel">
         Speed (value: 200)
         <input

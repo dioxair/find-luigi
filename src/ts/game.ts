@@ -94,8 +94,8 @@ class AnimatedIcon {
 let icons: AnimatedIcon[] = [];
 
 export function init() {
-  const minIcons = 50;
-  const maxIcons = 100;
+  const minIcons = settings.minIcons;
+  const maxIcons = settings.maxIcons;
   const iconCount =
     Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
 

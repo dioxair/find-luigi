@@ -1,6 +1,8 @@
 export let shuffleCharacterLayers = true;
 export let useInterpolation = false;
 export let movementThreshold = 1;
+export let minIcons = 50;
+export let maxIcons = 100;
 export let speed = 200;
 
 const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
@@ -11,6 +13,12 @@ const useInterpolationCheckbox: HTMLInputElement = document.getElementById(
 ) as HTMLInputElement;
 const movementThresholdField: HTMLInputElement = document.getElementById(
   "movementThresholdField",
+) as HTMLInputElement;
+const minimumIconsField: HTMLInputElement = document.getElementById(
+  "minimumIconsField",
+) as HTMLInputElement;
+const maximumIconsField: HTMLInputElement = document.getElementById(
+  "maximumIconsField",
 ) as HTMLInputElement;
 const speedField: HTMLInputElement = document.getElementById(
   "speedField",
@@ -31,13 +39,22 @@ export function applySettings() {
   const shuffleLayersValue = shuffleLayersCheckbox.checked;
   const useInterpolationValue = useInterpolationCheckbox.checked;
   const movementThresholdValue = parseFloat(movementThresholdField.value);
+  const minimumIconsValue = parseFloat(minimumIconsField.value);
+  const maximumIconsValue = parseFloat(maximumIconsField.value);
   const speedValue = parseFloat(speedField.value);
 
   shuffleCharacterLayers = shuffleLayersValue;
   useInterpolation = useInterpolationValue;
 
-  if (!isNaN(movementThresholdValue) && !isNaN(speedValue)) {
+  if (
+    !isNaN(movementThresholdValue) &&
+    !isNaN(speedValue) &&
+    !isNaN(minimumIconsValue) &&
+    !isNaN(maximumIconsValue)
+  ) {
     movementThreshold = movementThresholdValue;
+    minIcons = minimumIconsValue;
+    maxIcons = maximumIconsValue;
     speed = speedValue;
   }
 }
