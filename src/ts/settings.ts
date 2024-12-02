@@ -1,15 +1,19 @@
+export let shuffleCharacterLayers = true;
+export let useInterpolation = false;
 export let movementThreshold = 1;
 export let speed = 200;
-export let shuffleCharacterLayers = true;
 
+const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
+  "shuffleLayersCheckbox",
+) as HTMLInputElement;
+const useInterpolationCheckbox: HTMLInputElement = document.getElementById(
+  "useInterpolationCheckbox",
+) as HTMLInputElement;
 const movementThresholdField: HTMLInputElement = document.getElementById(
   "movementThresholdField",
 ) as HTMLInputElement;
 const speedField: HTMLInputElement = document.getElementById(
   "speedField",
-) as HTMLInputElement;
-const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
-  "shuffleLayersCheckbox",
 ) as HTMLInputElement;
 
 speedField.addEventListener("input", function () {
@@ -24,14 +28,16 @@ speedField.addEventListener("input", function () {
 });
 
 export function applySettings() {
+  const shuffleLayersValue = shuffleLayersCheckbox.checked;
+  const useInterpolationValue = useInterpolationCheckbox.checked;
   const movementThresholdValue = parseFloat(movementThresholdField.value);
   const speedValue = parseFloat(speedField.value);
-  const shuffleLayersValue = shuffleLayersCheckbox.checked;
+
+  shuffleCharacterLayers = shuffleLayersValue;
+  useInterpolation = useInterpolationValue;
 
   if (!isNaN(movementThresholdValue) && !isNaN(speedValue)) {
     movementThreshold = movementThresholdValue;
     speed = speedValue;
   }
-
-  shuffleCharacterLayers = shuffleLayersValue;
 }

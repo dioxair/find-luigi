@@ -78,7 +78,7 @@ class AnimatedIcon {
       this.lastY = this.initialY;
     }
 
-    if (settings.movementThreshold > 3) {
+    if (settings.useInterpolation) {
       const smoothingFactor = 0.1;
       this.currentX += (this.lastX - this.currentX) * smoothingFactor;
       this.currentY += (this.lastY - this.currentY) * smoothingFactor;
