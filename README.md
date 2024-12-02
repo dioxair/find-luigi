@@ -1,5 +1,5 @@
 # find-luigi
-![image](https://github.com/user-attachments/assets/a0afd962-74eb-4868-9207-73fd146ccf74)
+![image](https://github.com/user-attachments/assets/9f7d2006-19e3-41df-9667-a83a69d8e983)
 
 ## An online version of the "Wanted!" minigame from Super Mario 64 DS, inspired by the @FindLuigi Twitter account
 
