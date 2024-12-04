@@ -28,7 +28,10 @@ class AnimatedIcon {
 }
 
 let icons: AnimatedIcon[] = [];
-const worker = new Worker("./src/ts/animation-worker.ts");
+const worker = new Worker(
+  new URL("./animation-worker.ts?worker&url", import.meta.url),
+  { type: "module" },
+);
 
 worker.onmessage = (event) => {
   const { type, positions } = event.data;
