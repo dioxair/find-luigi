@@ -51,10 +51,14 @@ function calculatePositions(currentTimestamp: number) {
     let newX = icon.x + icon.dx * deltaTime;
     let newY = icon.y + icon.dy * deltaTime;
 
-    if (newX + icon.width > gameWidth || newX < 0) {
+    // Clamp newX and newY within game boundaries
+    newX = Math.max(0, Math.min(newX, gameWidth - icon.width));
+    newY = Math.max(0, Math.min(newY, gameHeight - icon.height));
+
+    if (newX === 0 || newX === gameWidth - icon.width) {
       icon.dx = -icon.dx;
     }
-    if (newY + icon.height > gameHeight || newY < 0) {
+    if (newY === 0 || newY === gameHeight - icon.height) {
       icon.dy = -icon.dy;
     }
 

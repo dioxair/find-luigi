@@ -2,6 +2,10 @@ import * as game from "./game";
 import * as settings from "./settings";
 
 export let gameRect: DOMRect;
+export let gameOffsetWidth: number;
+export let gameOffsetHeight: number;
+
+export let isWindowFocused: boolean = true;
 
 window.addEventListener("load", function () {
   // make gameWindow window non-responsive
@@ -16,6 +20,8 @@ window.addEventListener("load", function () {
   gameWindow.style.minHeight = `${initialHeight}px`;
 
   gameRect = gameWindow.getBoundingClientRect();
+  gameOffsetWidth = initialWidth;
+  gameOffsetHeight = initialHeight;
 
   window.addEventListener("resize", function () {
     gameWindow.style.width = `${initialWidth}px`;
