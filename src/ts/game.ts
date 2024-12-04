@@ -101,9 +101,11 @@ export function init() {
   animatedIcon.updatePosition(properties.randomX, properties.randomY);
   icons.push(animatedIcon);
 
-  for (let i = 0; i < iconCount; i++) {
-    const character = characters[i % characters.length];
-    if (character.src.includes("luigi")) continue;
+  for (let i = 0; i < iconCount - 1; i++) {
+    let character = characters[i % characters.length];
+    if (character.src.includes("luigi")) {
+      character = characters[(i + 1) % characters.length];
+    }
 
     const properties = newCharacterInstance(character);
 
