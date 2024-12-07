@@ -21,6 +21,16 @@ body {
   user-select: none;
 }
 
+#fpsCounter {
+  z-index: 50;
+  font-size: 20px;
+  padding: 20px;
+  position: fixed;
+  user-select: none;
+  top: 0;
+  right: 0;
+}
+
 #game {
   min-height: 100vh;
   min-width: 100vw;

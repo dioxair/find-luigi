@@ -11,6 +11,7 @@
     <button id="startButton">Click to start</button>
     <audio id="music" src="music.mp3" loop></audio>
 
+    <p id="fpsCounter">FPS: 0</p>
     <div id="game"></div>
 
     <h1 id="settings">Settings</h1>
@@ -34,6 +35,16 @@
             class="label-info-icon"
         /></span>
         <input type="checkbox" id="useInterpolationCheckbox" />
+      </label>
+      <label>
+        <span>
+          Show FPS
+          <img
+            src="img/info-icon.svg"
+            title="Note: By default, Find Luigi (and most other websites) are capped at your monitor's refresh rate"
+            class="label-info-icon"
+        /></span>
+        <input type="checkbox" checked="true" id="showFPSCheckbox" />
       </label>
       <label>
         <span>

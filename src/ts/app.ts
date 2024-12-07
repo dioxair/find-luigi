@@ -4,6 +4,8 @@ import * as settings from "./settings";
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
 export let gameOffsetHeight: number;
+// this is way too silly pls fix future me
+export let realFPS: number;
 
 export let isWindowFocused: boolean = true;
 
@@ -29,32 +31,37 @@ window.addEventListener("load", function () {
     gameWindow.style.minWidth = `${initialWidth}px`;
     gameWindow.style.minHeight = `${initialHeight}px`;
   });
-
-  // FPS Counter UI soon ;)
-  const times: number[] = [];
-  let fps: number;
-  let isFpsOn = false;
-
-  function fpsCounter() {
-    requestAnimationFrame(() => {
-      const now = performance.now();
-      while (times.length > 0 && times[0] <= now - 1000) {
-        times.shift();
-      }
-      times.push(now);
-      fps = times.length;
-      fpsCounter();
-    });
-  }
-
-  if (isFpsOn) {
-    setInterval(() => {
-      console.log(fps);
-    }, 1000);
-
-    fpsCounter();
-  }
 });
+
+const times: number[] = [];
+let fps: number;
+const fpsCounterElement: HTMLParagraphElement = document.getElementById(
+  "fpsCounter",
+) as HTMLParagraphElement;
+
+function fpsCounter() {
+  requestAnimationFrame(() => {
+    const now = performance.now();
+    while (times.length > 0 && times[0] <= now - 1000) {
+      times.shift();
+    }
+    times.push(now);
+    fps = times.length;
+    fpsCounter();
+  });
+}
+
+setInterval(() => {
+  realFPS = fps;
+  if (settings.showFPS) {
+    fpsCounterElement.hidden = false;
+    fpsCounterElement.textContent = `FPS: ${realFPS}`;
+  } else {
+    fpsCounterElement.hidden = true;
+  }
+}, 1000);
+
+fpsCounter();
 
 document
   .getElementById("startButton")

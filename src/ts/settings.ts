@@ -1,5 +1,6 @@
 export let shuffleCharacterLayers = true;
 export let useInterpolation = false;
+export let showFPS = true;
 export let movementThreshold = 1;
 export let minIcons = 50;
 export let maxIcons = 100;
@@ -10,6 +11,9 @@ const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
 ) as HTMLInputElement;
 const useInterpolationCheckbox: HTMLInputElement = document.getElementById(
   "useInterpolationCheckbox",
+) as HTMLInputElement;
+const showFPSCheckbox: HTMLInputElement = document.getElementById(
+  "showFPSCheckbox",
 ) as HTMLInputElement;
 const movementThresholdField: HTMLInputElement = document.getElementById(
   "movementThresholdField",
@@ -38,6 +42,7 @@ speedField.addEventListener("input", function () {
 export function applySettings() {
   const shuffleLayersValue = shuffleLayersCheckbox.checked;
   const useInterpolationValue = useInterpolationCheckbox.checked;
+  const showFPSValue = showFPSCheckbox.checked;
   const movementThresholdValue = parseFloat(movementThresholdField.value);
   const minimumIconsValue = parseFloat(minimumIconsField.value);
   const maximumIconsValue = parseFloat(maximumIconsField.value);
@@ -45,6 +50,7 @@ export function applySettings() {
 
   shuffleCharacterLayers = shuffleLayersValue;
   useInterpolation = useInterpolationValue;
+  showFPS = showFPSValue;
 
   if (
     !isNaN(movementThresholdValue) &&
