@@ -77,9 +77,14 @@ export function init() {
   const fragment = document.createDocumentFragment();
   const characters: Character[] = [
     { src: "img/character/luigi.png", width: 60, height: 77 },
-    { src: "img/character/mario.png", width: 60, height: 69 },
-    { src: "img/character/wario.png", width: 60, height: 64 },
   ];
+
+  if (settings.useMario)
+    characters.push({ src: "img/character/mario.png", width: 60, height: 69 });
+  if (settings.useWario)
+    characters.push({ src: "img/character/wario.png", width: 60, height: 64 });
+  if (settings.useYoshi)
+    characters.push({ src: "img/character/yoshi.png", width: 60, height: 83 });
 
   const workerIcons = [];
   const images = [];

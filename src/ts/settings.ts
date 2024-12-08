@@ -1,3 +1,19 @@
+export let useMario: boolean = getAndParseLocalStorage(
+  "useMario",
+  parseBoolean,
+  true,
+);
+export let useWario: boolean = getAndParseLocalStorage(
+  "useWario",
+  parseBoolean,
+  true,
+);
+export let useYoshi: boolean = getAndParseLocalStorage(
+  "useYoshi",
+  parseBoolean,
+  false,
+);
+
 export let shuffleCharacterLayers: boolean = getAndParseLocalStorage(
   "shuffleCharacterLayers",
   parseBoolean,
@@ -30,6 +46,16 @@ export let maxIcons: number = getAndParseLocalStorage(
 );
 export let speed: number = getAndParseLocalStorage("speed", parseInt, 200);
 
+const useMarioCheckbox: HTMLInputElement = document.getElementById(
+  "useMarioCheckbox",
+) as HTMLInputElement;
+const useWarioCheckbox: HTMLInputElement = document.getElementById(
+  "useWarioCheckbox",
+) as HTMLInputElement;
+const useYoshiCheckbox: HTMLInputElement = document.getElementById(
+  "useYoshiCheckbox",
+) as HTMLInputElement;
+
 const shuffleLayersCheckbox: HTMLInputElement = document.getElementById(
   "shuffleLayersCheckbox",
 ) as HTMLInputElement;
@@ -51,6 +77,10 @@ const maximumIconsField: HTMLInputElement = document.getElementById(
 const speedField: HTMLInputElement = document.getElementById(
   "speedField",
 ) as HTMLInputElement;
+
+useMarioCheckbox.checked = useMario;
+useWarioCheckbox.checked = useWario;
+useYoshiCheckbox.checked = useYoshi;
 
 shuffleLayersCheckbox.checked = shuffleCharacterLayers;
 useInterpolationCheckbox.checked = useInterpolation;
@@ -76,6 +106,10 @@ speedField.addEventListener("input", function () {
 });
 
 export function applySettings() {
+  const useMarioValue = useMarioCheckbox.checked;
+  const useWarioValue = useWarioCheckbox.checked;
+  const useYoshiValue = useYoshiCheckbox.checked;
+
   const shuffleLayersValue = shuffleLayersCheckbox.checked;
   const useInterpolationValue = useInterpolationCheckbox.checked;
   const showFPSValue = showFPSCheckbox.checked;
@@ -83,6 +117,10 @@ export function applySettings() {
   const minimumIconsValue = parseInt(minimumIconsField.value);
   const maximumIconsValue = parseInt(maximumIconsField.value);
   const speedValue = parseInt(speedField.value);
+
+  useMario = useMarioValue;
+  useWario = useWarioValue;
+  useYoshi = useYoshiValue;
 
   shuffleCharacterLayers = shuffleLayersValue;
   useInterpolation = useInterpolationValue;
@@ -99,6 +137,10 @@ export function applySettings() {
     maxIcons = maximumIconsValue;
     speed = speedValue;
   }
+
+  localStorage.setItem("useMario", useMarioValue.toString());
+  localStorage.setItem("useWario", useWarioValue.toString());
+  localStorage.setItem("useYoshi", useYoshiValue.toString());
 
   localStorage.setItem("shuffleCharacterLayers", shuffleLayersValue.toString());
   localStorage.setItem("useInterpolation", useInterpolationValue.toString());
