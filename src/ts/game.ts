@@ -1,4 +1,4 @@
-import * as settings from "./settings";
+import { settings } from "./settings";
 import * as app from "./app";
 
 interface IconData {

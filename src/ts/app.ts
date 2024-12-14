@@ -1,5 +1,5 @@
 import * as game from "./game";
-import * as settings from "./settings";
+import { settings, applySettings } from "./settings";
 
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
@@ -69,7 +69,7 @@ document
 document
   .getElementById("applySettingsButton")
   ?.addEventListener("click", () => {
-    settings.applySettings();
+    applySettings();
 
     const audioElement: HTMLAudioElement = document.getElementById(
       "music",
