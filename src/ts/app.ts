@@ -68,7 +68,18 @@ document
   ?.addEventListener("click", () => start());
 document
   .getElementById("applySettingsButton")
-  ?.addEventListener("click", () => settings.applySettings());
+  ?.addEventListener("click", () => {
+    settings.applySettings();
+
+    const audioElement: HTMLAudioElement = document.getElementById(
+      "music",
+    ) as HTMLAudioElement;
+    if (settings.music) {
+      audioElement.muted = false;
+    } else {
+      audioElement.muted = true;
+    }
+  });
 
 function start() {
   (

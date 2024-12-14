@@ -29,6 +29,11 @@ export let showFPS: boolean = getAndParseLocalStorage(
   parseBoolean,
   true,
 );
+export let music: boolean = getAndParseLocalStorage(
+  "music",
+  parseBoolean,
+  true,
+);
 export let movementThreshold: number = getAndParseLocalStorage(
   "movementThreshold",
   parseInt,
@@ -65,6 +70,9 @@ const useInterpolationCheckbox: HTMLInputElement = document.getElementById(
 const showFPSCheckbox: HTMLInputElement = document.getElementById(
   "showFPSCheckbox",
 ) as HTMLInputElement;
+const musicCheckbox: HTMLInputElement = document.getElementById(
+  "musicCheckbox",
+) as HTMLInputElement;
 const movementThresholdField: HTMLInputElement = document.getElementById(
   "movementThresholdField",
 ) as HTMLInputElement;
@@ -85,6 +93,7 @@ useYoshiCheckbox.checked = useYoshi;
 shuffleLayersCheckbox.checked = shuffleCharacterLayers;
 useInterpolationCheckbox.checked = useInterpolation;
 showFPSCheckbox.checked = showFPS;
+musicCheckbox.checked = music;
 movementThresholdField.value = movementThreshold.toString();
 minimumIconsField.value = minIcons.toString();
 maximumIconsField.value = maxIcons.toString();
@@ -113,6 +122,7 @@ export function applySettings() {
   const shuffleLayersValue = shuffleLayersCheckbox.checked;
   const useInterpolationValue = useInterpolationCheckbox.checked;
   const showFPSValue = showFPSCheckbox.checked;
+  const musicValue = musicCheckbox.checked;
   const movementThresholdValue = parseInt(movementThresholdField.value);
   const minimumIconsValue = parseInt(minimumIconsField.value);
   const maximumIconsValue = parseInt(maximumIconsField.value);
@@ -125,6 +135,7 @@ export function applySettings() {
   shuffleCharacterLayers = shuffleLayersValue;
   useInterpolation = useInterpolationValue;
   showFPS = showFPSValue;
+  music = musicValue;
 
   if (
     !isNaN(movementThresholdValue) &&
@@ -145,6 +156,7 @@ export function applySettings() {
   localStorage.setItem("shuffleCharacterLayers", shuffleLayersValue.toString());
   localStorage.setItem("useInterpolation", useInterpolationValue.toString());
   localStorage.setItem("showFPS", showFPSValue.toString());
+  localStorage.setItem("music", musicValue.toString());
   localStorage.setItem("movementThreshold", movementThresholdValue.toString());
   localStorage.setItem("minimumIcons", minimumIconsValue.toString());
   localStorage.setItem("maximumIcons", maximumIconsValue.toString());

@@ -47,6 +47,12 @@ body {
   transform: translate(-50%, -50%);
 }
 
+#applySettingsButton {
+  margin: auto;
+  max-width: 30%;
+  max-height: 30%;
+}
+
 #settings {
   display: flex;
   flex-direction: column;
