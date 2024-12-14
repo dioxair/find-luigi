@@ -25,9 +25,9 @@ const settingsDefaults: Settings = {
   showFPS: true,
   music: true,
   movementThreshold: 1,
-  minIcons: 150,
-  maxIcons: 200,
-  speed: 200,
+  minIcons: 50,
+  maxIcons: 100,
+  speed: 400,
 };
 
 const inputElements: InputElements = {
