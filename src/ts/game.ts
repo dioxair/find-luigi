@@ -50,8 +50,8 @@ function newCharacterInstance(character: Character) {
   image.height = character.height;
   image.className = "animated-icon";
 
-  const randomX = Math.random() * (app.gameRect.width - character.width);
-  const randomY = Math.random() * (app.gameRect.height - character.height);
+  const randomX = Math.random() * (app.gameOffsetWidth - character.width);
+  const randomY = Math.random() * (app.gameOffsetHeight - character.height);
   const randomDx = (Math.random() - 0.5) * settings.speed;
   const randomDy = (Math.random() - 0.5) * settings.speed;
 
@@ -145,8 +145,8 @@ export function init() {
   worker.postMessage({
     type: "init",
     iconData: workerIcons,
-    gameWidth: app.gameRect.width,
-    gameHeight: app.gameRect.height,
+    gameWidth: app.gameOffsetWidth,
+    gameHeight: app.gameOffsetHeight,
     movementThreshold: settings.movementThreshold,
     useInterpolation: settings.useInterpolation,
   });

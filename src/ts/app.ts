@@ -14,26 +14,20 @@ const audioElement: HTMLAudioElement = document.getElementById(
 ) as HTMLAudioElement;
 
 window.addEventListener("load", function () {
-  // make gameWindow window non-responsive
   const gameWindow = document.getElementById("game")!;
 
-  const initialWidth = gameWindow.offsetWidth;
-  const initialHeight = gameWindow.offsetHeight;
-
-  gameWindow.style.width = `${initialWidth}px`;
-  gameWindow.style.height = `${initialHeight}px`;
-  gameWindow.style.minWidth = `${initialWidth}px`;
-  gameWindow.style.minHeight = `${initialHeight}px`;
-
-  gameRect = gameWindow.getBoundingClientRect();
-  gameOffsetWidth = initialWidth;
-  gameOffsetHeight = initialHeight;
+  gameOffsetWidth = gameWindow.offsetWidth;
+  gameOffsetHeight = gameWindow.offsetHeight;
 
   window.addEventListener("resize", function () {
-    gameWindow.style.width = `${initialWidth}px`;
-    gameWindow.style.height = `${initialHeight}px`;
-    gameWindow.style.minWidth = `${initialWidth}px`;
-    gameWindow.style.minHeight = `${initialHeight}px`;
+    gameRect = gameWindow.getBoundingClientRect();
+    gameOffsetWidth = gameWindow.offsetWidth;
+    gameOffsetHeight = gameWindow.offsetHeight;
+
+    gameWindow.style.width = `${gameOffsetWidth}px`;
+    gameWindow.style.height = `${gameOffsetHeight}px`;
+    gameWindow.style.minWidth = `${gameOffsetWidth}px`;
+    gameWindow.style.minHeight = `${gameOffsetHeight}px`;
   });
 
   // set music state

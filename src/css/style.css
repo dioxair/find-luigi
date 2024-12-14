@@ -32,19 +32,30 @@ body {
 }
 
 #game {
-  min-height: 100vh;
-  min-width: 100vw;
-  flex: 1;
+  --r: 960 / 540;
+
+  aspect-ratio: var(--r);
+  width: min(90%, min(960px, 90vh * (var(--r))));
+  transform-origin: center;
+
   display: flex;
+  margin: auto;
+  flex: 1;
+}
+
+@media (max-width: 960px), (max-height: 540px) {
+  #game {
+    zoom: 50%;
+  }
 }
 
 #startButton {
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  max-width: 30%;
+  max-height: 30%;
 }
 
 #applySettingsButton {
