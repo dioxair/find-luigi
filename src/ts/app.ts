@@ -9,6 +9,10 @@ export let realFPS: number;
 
 export let isWindowFocused: boolean = true;
 
+const audioElement: HTMLAudioElement = document.getElementById(
+  "music",
+) as HTMLAudioElement;
+
 window.addEventListener("load", function () {
   // make gameWindow window non-responsive
   const gameWindow = document.getElementById("game")!;
@@ -31,6 +35,13 @@ window.addEventListener("load", function () {
     gameWindow.style.minWidth = `${initialWidth}px`;
     gameWindow.style.minHeight = `${initialHeight}px`;
   });
+
+  // set music state
+  if (settings.music) {
+    audioElement.muted = false;
+  } else {
+    audioElement.muted = true;
+  }
 });
 
 const times: number[] = [];
@@ -71,9 +82,6 @@ document
   ?.addEventListener("click", () => {
     applySettings();
 
-    const audioElement: HTMLAudioElement = document.getElementById(
-      "music",
-    ) as HTMLAudioElement;
     if (settings.music) {
       audioElement.muted = false;
     } else {
