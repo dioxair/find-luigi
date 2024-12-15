@@ -50,6 +50,9 @@ function newCharacterInstance(character: Character) {
   image.height = character.height;
   image.className = "animated-icon";
 
+  image.draggable = false;
+  image.addEventListener("dragstart", (event) => event.preventDefault());
+
   const randomX = Math.random() * (app.gameOffsetWidth - character.width);
   const randomY = Math.random() * (app.gameOffsetHeight - character.height);
   const randomDx = (Math.random() - 0.5) * settings.speed;
@@ -90,6 +93,10 @@ export function init() {
   const images = [];
 
   const properties = newCharacterInstance(characters[0]);
+
+  properties.image.addEventListener("click", () => {
+    // point system here i think
+  });
 
   workerIcons.push({
     x: properties.randomX,
