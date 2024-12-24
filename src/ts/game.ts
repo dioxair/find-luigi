@@ -1,6 +1,10 @@
 import { settings } from "./settings";
 import * as app from "./app";
 
+let points = 0;
+let isWindowFocused: boolean = true;
+let gameRunning: boolean = false;
+
 interface IconData {
   x: number;
   y: number;
@@ -35,7 +39,7 @@ const worker = new Worker(
 
 worker.onmessage = (event) => {
   const { type, positions } = event.data;
-  if (type === "update") {
+  if (type === "update" || type === "sync") {
     positions.forEach((position: IconData, index: number) => {
       const icon = icons[index];
       icon.updatePosition(position.x, position.y);
@@ -95,7 +99,9 @@ export function init() {
   const properties = newCharacterInstance(characters[0]);
 
   properties.image.addEventListener("click", () => {
-    // point system here i think
+    // luigi
+    points++;
+    console.log(points);
   });
 
   workerIcons.push({
@@ -149,6 +155,7 @@ export function init() {
 
   gameWindow.appendChild(fragment);
 
+  gameRunning = true;
   worker.postMessage({
     type: "init",
     iconData: workerIcons,
@@ -160,10 +167,39 @@ export function init() {
 }
 
 export function animateAll() {
-  worker.postMessage({
-    type: "animate",
-    time: performance.now(),
-  });
+  if (isWindowFocused) {
+    worker.postMessage({
+      type: "animate",
+      time: performance.now(),
+    });
 
-  requestAnimationFrame(animateAll);
+    requestAnimationFrame(animateAll);
+  }
 }
+
+window.addEventListener("visibilitychange", () => {
+  if (document.visibilityState == "visible") {
+    isWindowFocused = true;
+    if (!gameRunning) return;
+    worker.postMessage({ type: "pause", paused: false });
+    requestAnimationFrame(animateAll);
+  } else {
+    if (!gameRunning) return;
+    isWindowFocused = false;
+    worker.postMessage({ type: "pause", paused: true });
+  }
+});
+
+window.addEventListener("focus", () => {
+  isWindowFocused = true;
+  if (!gameRunning) return;
+  worker.postMessage({ type: "pause", paused: false });
+  worker.postMessage({ type: "sync" });
+  requestAnimationFrame(animateAll);
+});
+
+window.addEventListener("blur", () => {
+  isWindowFocused = false;
+  if (!gameRunning) return;
+  worker.postMessage({ type: "pause", paused: true });
+});

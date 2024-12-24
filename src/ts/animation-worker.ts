@@ -10,6 +10,7 @@ interface IconData {
   lastX: number;
   lastY: number;
 }
+let ran = 0;
 
 let icons: IconData[] = [];
 let gameWidth: number;
@@ -18,6 +19,8 @@ let lastTimestamp: number | null = null;
 let movementThreshold: number;
 let useInterpolation: boolean;
 const smoothingFactor = 0.1;
+
+let paused = false; // New pause flag
 
 onmessage = (event) => {
   const { type, ...data } = event.data;
@@ -34,13 +37,27 @@ onmessage = (event) => {
     gameHeight = data.gameHeight;
     movementThreshold = data.movementThreshold;
     useInterpolation = data.useInterpolation;
-  } else if (type === "animate") {
+  } else if (type === "animate" && !paused) {
     calculatePositions(data.time);
+  } else if (type === "pause") {
+    paused = data.paused;
+  } else if (type === "sync") {
+    // Send current positions
+    const positions = icons.map((icon) => ({
+      x: useInterpolation ? icon.currentX : icon.lastX,
+      y: useInterpolation ? icon.currentY : icon.lastY,
+    }));
+    console.log("sync: ", positions[0]);
+    postMessage({ type: "sync", positions });
   }
 };
 
 function calculatePositions(currentTimestamp: number) {
+  if (paused) return;
+  console.log(ran++);
+
   if (lastTimestamp === null) {
+    console.log("cock");
     lastTimestamp = currentTimestamp;
     return;
   }
@@ -80,21 +97,15 @@ function calculatePositions(currentTimestamp: number) {
 
   lastTimestamp = currentTimestamp;
 
-  if (useInterpolation) {
-    postMessage({
-      type: "update",
-      positions: icons.map((icon) => ({
-        x: icon.currentX,
-        y: icon.currentY,
-      })),
-    });
-  } else {
-    postMessage({
-      type: "update",
-      positions: icons.map((icon) => ({
-        x: icon.lastX,
-        y: icon.lastY,
-      })),
-    });
-  }
+  const positions = icons.map((icon) =>
+    useInterpolation
+      ? { x: icon.currentX, y: icon.currentY }
+      : { x: icon.lastX, y: icon.lastY },
+  );
+  console.log("calc: ", positions[0]);
+
+  postMessage({
+    type: "update",
+    positions,
+  });
 }

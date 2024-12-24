@@ -7,8 +7,6 @@ export let gameOffsetHeight: number;
 // this is way too silly pls fix future me
 export let realFPS: number;
 
-export let isWindowFocused: boolean = true;
-
 const audioElement: HTMLAudioElement = document.getElementById(
   "music",
 ) as HTMLAudioElement;
