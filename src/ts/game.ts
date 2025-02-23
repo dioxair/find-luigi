@@ -43,7 +43,7 @@ characterImages.yoshi.src = "img/character/yoshi.png";
 
 worker.onmessage = (event) => {
   const { type, positions } = event.data;
-  if (type === "update" || type === "sync") {
+  if (type === "update") {
     positions.forEach((position: { x: number; y: number }, index: number) => {
       characters[index].x = position.x;
       characters[index].y = position.y;
@@ -177,11 +177,17 @@ canvas.addEventListener("click", (event) => {
 
 window.addEventListener("focus", () => {
   isWindowFocused = true;
+
+  worker.postMessage({ type: "animate", time: performance.now() });
   worker.postMessage({ type: "pause", paused: false });
+
   requestAnimationFrame(animateAll);
 });
+
 window.addEventListener("blur", () => {
   isWindowFocused = false;
+
+  worker.postMessage({ type: "animate", time: performance.now() });
   worker.postMessage({ type: "pause", paused: true });
 });
 

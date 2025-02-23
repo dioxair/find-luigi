@@ -38,19 +38,42 @@ onmessage = (event) => {
   } else if (type === "animate" && !paused) {
     updatePositions(data.time);
   } else if (type === "pause") {
+    const wasPaused = paused;
     paused = data.paused;
+
+    if (!paused && wasPaused) {
+      lastTimestamp = null;
+      icons = icons.map((icon) => ({
+        ...icon,
+        currentX: icon.x,
+        currentY: icon.y,
+        lastX: icon.x,
+        lastY: icon.y,
+      }));
+
+      postMessage({
+        type: "update",
+        positions: icons.map((icon) => ({ x: icon.x, y: icon.y })),
+      });
+    }
   }
 };
 
 function updatePositions(currentTimestamp: number) {
   if (paused) return;
 
+  // Guard against time anomalies
+  const maxDelta = 0.1;
+  let deltaTime = (currentTimestamp - lastTimestamp!) / 1000;
+
+  if (deltaTime > maxDelta) {
+    deltaTime = maxDelta;
+  }
+
   if (lastTimestamp === null) {
     lastTimestamp = currentTimestamp;
     return;
   }
-
-  const deltaTime = (currentTimestamp - lastTimestamp) / 1000;
 
   icons = icons.map((icon) => {
     let newX = icon.x + icon.dx * deltaTime;
