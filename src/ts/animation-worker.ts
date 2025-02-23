@@ -5,12 +5,11 @@ interface IconData {
   dy: number;
   width: number;
   height: number;
-  currentX: number;
-  currentY: number;
   lastX: number;
   lastY: number;
+  currentX: number;
+  currentY: number;
 }
-let ran = 0;
 
 let icons: IconData[] = [];
 let gameWidth: number;
@@ -18,9 +17,8 @@ let gameHeight: number;
 let lastTimestamp: number | null = null;
 let movementThreshold: number;
 let useInterpolation: boolean;
+let paused = false;
 const smoothingFactor = 0.1;
-
-let paused = false; // New pause flag
 
 onmessage = (event) => {
   const { type, ...data } = event.data;
@@ -28,36 +26,26 @@ onmessage = (event) => {
   if (type === "init") {
     icons = data.iconData.map((icon: IconData) => ({
       ...icon,
-      currentX: icon.x,
-      currentY: icon.y,
       lastX: icon.x,
       lastY: icon.y,
+      currentX: icon.x,
+      currentY: icon.y,
     }));
     gameWidth = data.gameWidth;
     gameHeight = data.gameHeight;
     movementThreshold = data.movementThreshold;
     useInterpolation = data.useInterpolation;
   } else if (type === "animate" && !paused) {
-    calculatePositions(data.time);
+    updatePositions(data.time);
   } else if (type === "pause") {
     paused = data.paused;
-  } else if (type === "sync") {
-    // Send current positions
-    const positions = icons.map((icon) => ({
-      x: useInterpolation ? icon.currentX : icon.lastX,
-      y: useInterpolation ? icon.currentY : icon.lastY,
-    }));
-    console.log("sync: ", positions[0]);
-    postMessage({ type: "sync", positions });
   }
 };
 
-function calculatePositions(currentTimestamp: number) {
+function updatePositions(currentTimestamp: number) {
   if (paused) return;
-  console.log(ran++);
 
   if (lastTimestamp === null) {
-    console.log("cock");
     lastTimestamp = currentTimestamp;
     return;
   }
@@ -68,16 +56,22 @@ function calculatePositions(currentTimestamp: number) {
     let newX = icon.x + icon.dx * deltaTime;
     let newY = icon.y + icon.dy * deltaTime;
 
-    // Clamp newX and newY within game boundaries
+    // Boundary checks
     newX = Math.max(0, Math.min(newX, gameWidth - icon.width));
     newY = Math.max(0, Math.min(newY, gameHeight - icon.height));
 
-    if (newX === 0 || newX === gameWidth - icon.width) {
-      icon.dx = -icon.dx;
+    // Bounce logic
+    if (newX <= 0 || newX >= gameWidth - icon.width) {
+      icon.dx *= -1;
+      newX = Math.max(0, Math.min(newX, gameWidth - icon.width));
     }
-    if (newY === 0 || newY === gameHeight - icon.height) {
-      icon.dy = -icon.dy;
+    if (newY <= 0 || newY >= gameHeight - icon.height) {
+      icon.dy *= -1;
+      newY = Math.max(0, Math.min(newY, gameHeight - icon.height));
     }
+
+    icon.x = newX;
+    icon.y = newY;
 
     if (
       Math.abs(newX - icon.lastX) > movementThreshold ||
@@ -90,22 +84,21 @@ function calculatePositions(currentTimestamp: number) {
     if (useInterpolation) {
       icon.currentX += (icon.lastX - icon.currentX) * smoothingFactor;
       icon.currentY += (icon.lastY - icon.currentY) * smoothingFactor;
+    } else {
+      icon.currentX = icon.lastX;
+      icon.currentY = icon.lastY;
     }
 
-    return { ...icon, x: newX, y: newY };
+    return icon;
   });
 
   lastTimestamp = currentTimestamp;
 
-  const positions = icons.map((icon) =>
-    useInterpolation
-      ? { x: icon.currentX, y: icon.currentY }
-      : { x: icon.lastX, y: icon.lastY },
-  );
-  console.log("calc: ", positions[0]);
-
   postMessage({
     type: "update",
-    positions,
+    positions: icons.map((icon) => ({
+      x: icon.currentX,
+      y: icon.currentY,
+    })),
   });
 }

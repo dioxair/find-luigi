@@ -1,205 +1,190 @@
 import { settings } from "./settings";
 import * as app from "./app";
 
-let points = 0;
-let isWindowFocused: boolean = true;
-let gameRunning: boolean = false;
+// this is so fucking stupid oh my god
+interface charImages {
+  luigi: HTMLImageElement;
+  mario: HTMLImageElement;
+  wario: HTMLImageElement;
+  yoshi: HTMLImageElement;
+}
 
-interface IconData {
+let canvas: HTMLCanvasElement = document.getElementById(
+  "gameCanvas",
+) as HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D = canvas.getContext(
+  "2d",
+) as CanvasRenderingContext2D;
+let characters: {
+  img: HTMLImageElement;
   x: number;
   y: number;
-}
-
-interface Character {
-  src: string;
   width: number;
   height: number;
-}
-
-class AnimatedIcon {
-  element: HTMLImageElement;
-
-  constructor(element: HTMLImageElement) {
-    this.element = element;
-
-    this.element.style.position = "absolute";
-    this.element.style.transform = "translate3d(0px, 0px, 0)";
-  }
-
-  updatePosition(x: number, y: number) {
-    this.element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  }
-}
-
-let icons: AnimatedIcon[] = [];
-const worker = new Worker(
+}[] = [];
+let worker = new Worker(
   new URL("./animation-worker.ts?worker&url", import.meta.url),
   { type: "module" },
 );
+let points = 0;
+let gameRunning = false;
+let isWindowFocused = true;
+
+const characterImages: charImages = {
+  luigi: new Image(),
+  mario: new Image(),
+  wario: new Image(),
+  yoshi: new Image(),
+};
+
+characterImages.luigi.src = "img/character/luigi.png";
+characterImages.mario.src = "img/character/mario.png";
+characterImages.wario.src = "img/character/wario.png";
+characterImages.yoshi.src = "img/character/yoshi.png";
 
 worker.onmessage = (event) => {
   const { type, positions } = event.data;
   if (type === "update" || type === "sync") {
-    positions.forEach((position: IconData, index: number) => {
-      const icon = icons[index];
-      icon.updatePosition(position.x, position.y);
+    positions.forEach((position: { x: number; y: number }, index: number) => {
+      characters[index].x = position.x;
+      characters[index].y = position.y;
     });
+    drawCharacters();
   }
 };
 
-function newCharacterInstance(character: Character) {
-  const image = document.createElement("img");
-  image.src = character.src;
-  image.width = character.width;
-  image.height = character.height;
-  image.className = "animated-icon";
-
-  image.draggable = false;
-  image.addEventListener("dragstart", (event) => event.preventDefault());
-
-  const randomX = Math.random() * (app.gameOffsetWidth - character.width);
-  const randomY = Math.random() * (app.gameOffsetHeight - character.height);
-  const randomDx = (Math.random() - 0.5) * settings.speed;
-  const randomDy = (Math.random() - 0.5) * settings.speed;
-
-  return {
-    image: image,
-    randomX: randomX,
-    randomY: randomY,
-    randomDx: randomDx,
-    randomDy: randomDy,
-  };
+function drawCharacters() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  characters.forEach(({ img, x, y, width, height }) => {
+    ctx.drawImage(img, x, y, width, height);
+  });
 }
 
-export function init() {
-  const gameWindow: HTMLDivElement = document.getElementById(
-    "game",
-  ) as HTMLDivElement;
+function init() {
+  canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+  ctx = canvas.getContext("2d")!;
+
+  canvas.width = app.gameOffsetWidth;
+  canvas.height = app.gameOffsetHeight;
+
+  const allCharacters = [
+    { name: "luigi", width: 60, height: 77 },
+    ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
+    ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
+    ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
+  ];
 
   const minIcons = settings.minIcons;
   const maxIcons = settings.maxIcons;
   const iconCount =
     Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
 
-  const fragment = document.createDocumentFragment();
-  const characters: Character[] = [
-    { src: "img/character/luigi.png", width: 60, height: 77 },
-  ];
-
-  if (settings.useMario)
-    characters.push({ src: "img/character/mario.png", width: 60, height: 69 });
-  if (settings.useWario)
-    characters.push({ src: "img/character/wario.png", width: 60, height: 64 });
-  if (settings.useYoshi)
-    characters.push({ src: "img/character/yoshi.png", width: 60, height: 83 });
-
   const workerIcons = [];
-  const images = [];
+  characters = [];
 
-  const properties = newCharacterInstance(characters[0]);
+  const character = allCharacters[0];
+  const randomX = Math.random() * (canvas.width - character.width);
+  const randomY = Math.random() * (canvas.height - character.height);
+  const randomDx = (Math.random() - 0.5) * settings.speed;
+  const randomDy = (Math.random() - 0.5) * settings.speed;
 
-  properties.image.addEventListener("click", () => {
-    // luigi
-    points++;
-    console.log(points);
+  characters.push({
+    img: characterImages[character.name as keyof charImages],
+    x: randomX,
+    y: randomY,
+    width: character.width,
+    height: character.height,
   });
 
   workerIcons.push({
-    x: properties.randomX,
-    y: properties.randomY,
-    dx: properties.randomDx,
-    dy: properties.randomDy,
-    width: characters[0].width,
-    height: characters[0].height,
+    x: randomX,
+    y: randomY,
+    dx: randomDx,
+    dy: randomDy,
+    width: character.width,
+    height: character.height,
   });
 
-  images.push(properties.image);
-
-  const animatedIcon = new AnimatedIcon(properties.image);
-  animatedIcon.updatePosition(properties.randomX, properties.randomY);
-  icons.push(animatedIcon);
-
-  for (let i = 0; i < iconCount - 1; i++) {
-    let character = characters[i % characters.length];
-    if (character.src.includes("luigi")) {
-      character = characters[(i + 1) % characters.length];
+  for (let i = 0; i < iconCount; i++) {
+    let character = allCharacters[i % allCharacters.length];
+    if (character.name === "luigi") {
+      character = allCharacters[(i + 1) % allCharacters.length];
     }
+    const randomX = Math.random() * (canvas.width - character.width);
+    const randomY = Math.random() * (canvas.height - character.height);
+    const randomDx = (Math.random() - 0.5) * settings.speed;
+    const randomDy = (Math.random() - 0.5) * settings.speed;
 
-    const properties = newCharacterInstance(character);
-
-    workerIcons.push({
-      x: properties.randomX,
-      y: properties.randomY,
-      dx: properties.randomDx,
-      dy: properties.randomDy,
+    characters.push({
+      img: characterImages[character.name as keyof charImages],
+      x: randomX,
+      y: randomY,
       width: character.width,
       height: character.height,
     });
 
-    images.push(properties.image);
-
-    const animatedIcon = new AnimatedIcon(properties.image);
-    animatedIcon.updatePosition(properties.randomX, properties.randomY);
-    icons.push(animatedIcon);
+    workerIcons.push({
+      x: randomX,
+      y: randomY,
+      dx: randomDx,
+      dy: randomDy,
+      width: character.width,
+      height: character.height,
+    });
   }
 
-  if (settings.shuffleCharacterLayers) {
-    // Fisher-Yates Shuffle
-    for (let i = images.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [images[i], images[j]] = [images[j], images[i]];
-    }
-  }
-
-  images.forEach((image) => fragment.appendChild(image));
-
-  gameWindow.appendChild(fragment);
+  console.log(
+    `Characters: ${characters.length}\nWorker icons: ${workerIcons.length}`,
+  );
 
   gameRunning = true;
   worker.postMessage({
     type: "init",
     iconData: workerIcons,
-    gameWidth: app.gameOffsetWidth,
-    gameHeight: app.gameOffsetHeight,
+    gameWidth: canvas.width,
+    gameHeight: canvas.height,
     movementThreshold: settings.movementThreshold,
     useInterpolation: settings.useInterpolation,
   });
+
+  requestAnimationFrame(animateAll);
 }
 
 export function animateAll() {
   if (isWindowFocused) {
-    worker.postMessage({
-      type: "animate",
-      time: performance.now(),
-    });
-
+    worker.postMessage({ type: "animate", time: performance.now() });
     requestAnimationFrame(animateAll);
   }
 }
 
-window.addEventListener("visibilitychange", () => {
-  if (document.visibilityState == "visible") {
-    isWindowFocused = true;
-    if (!gameRunning) return;
-    worker.postMessage({ type: "pause", paused: false });
-    requestAnimationFrame(animateAll);
-  } else {
-    if (!gameRunning) return;
-    isWindowFocused = false;
-    worker.postMessage({ type: "pause", paused: true });
-  }
+canvas.addEventListener("click", (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  characters.forEach(({ x, y, width, height }, index) => {
+    if (
+      clickX >= x &&
+      clickX <= x + width &&
+      clickY >= y &&
+      clickY <= y + height
+    ) {
+      if (characters[index].img === characterImages.luigi) {
+        points++;
+        console.log("Points:", points);
+      }
+    }
+  });
 });
 
 window.addEventListener("focus", () => {
   isWindowFocused = true;
-  if (!gameRunning) return;
   worker.postMessage({ type: "pause", paused: false });
-  worker.postMessage({ type: "sync" });
   requestAnimationFrame(animateAll);
 });
-
 window.addEventListener("blur", () => {
   isWindowFocused = false;
-  if (!gameRunning) return;
   worker.postMessage({ type: "pause", paused: true });
 });
+
+export { init };

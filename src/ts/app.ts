@@ -28,7 +28,6 @@ window.addEventListener("load", function () {
     gameWindow.style.minHeight = `${gameOffsetHeight}px`;
   });
 
-  // set music state
   if (settings.music) {
     audioElement.muted = false;
   } else {

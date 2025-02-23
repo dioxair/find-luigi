@@ -16,14 +16,6 @@ body {
   flex-direction: column;
 }
 
-.animated-icon {
-  user-select: none;
-  -webkit-user-drag: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  cursor: pointer;
-}
-
 #fpsCounter {
   z-index: 50;
   font-size: 20px;
@@ -36,14 +28,13 @@ body {
 
 #game {
   --r: 960 / 540;
-
   aspect-ratio: var(--r);
   width: min(90%, min(960px, 90vh * (var(--r))));
   transform-origin: center;
-
   display: flex;
   margin: auto;
   flex: 1;
+  position: relative;
 }
 
 @media (max-width: 960px), (max-height: 540px) {
@@ -53,18 +44,45 @@ body {
 }
 
 #startButton {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: auto;
-  max-width: 30%;
-  max-height: 30%;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  padding: 15px 30px;
+  font-size: 1em;
+  background: #202020;
+  color: white;
+  border: 2px solid #404040;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#startButton:hover {
+  background: #303030;
+  border-color: #505050;
 }
 
 #applySettingsButton {
+  font-family: "JetBrains Mono", monospace;
   margin: auto;
   max-width: 30%;
   max-height: 30%;
+  padding: 15px 30px;
+  background: #202020;
+  color: white;
+  border: 2px solid #404040;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#applySettingsButton:hover {
+  background: #303030;
+  border-color: #505050;
 }
 
 #settings {
