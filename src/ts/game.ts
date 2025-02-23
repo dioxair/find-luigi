@@ -27,7 +27,6 @@ let worker = new Worker(
   { type: "module" },
 );
 let points = 0;
-let gameRunning = false;
 let isWindowFocused = true;
 
 const characterImages: charImages = {
@@ -137,7 +136,6 @@ function init() {
     `Characters: ${characters.length}\nWorker icons: ${workerIcons.length}`,
   );
 
-  gameRunning = true;
   worker.postMessage({
     type: "init",
     iconData: workerIcons,
