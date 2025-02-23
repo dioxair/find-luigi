@@ -9,10 +9,10 @@ interface charImages {
   yoshi: HTMLImageElement;
 }
 
-let canvas: HTMLCanvasElement = document.getElementById(
+const canvas: HTMLCanvasElement = document.getElementById(
   "gameCanvas",
 ) as HTMLCanvasElement;
-let ctx: CanvasRenderingContext2D = canvas.getContext(
+const ctx: CanvasRenderingContext2D = canvas.getContext(
   "2d",
 ) as CanvasRenderingContext2D;
 let characters: {
@@ -28,6 +28,7 @@ let worker = new Worker(
 );
 let points = 0;
 let isWindowFocused = true;
+let isGameRunning = false;
 
 const characterImages: charImages = {
   luigi: new Image(),
@@ -60,9 +61,6 @@ function drawCharacters() {
 }
 
 function init() {
-  canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-  ctx = canvas.getContext("2d")!;
-
   canvas.width = app.gameOffsetWidth;
   canvas.height = app.gameOffsetHeight;
 
@@ -132,10 +130,6 @@ function init() {
     });
   }
 
-  console.log(
-    `Characters: ${characters.length}\nWorker icons: ${workerIcons.length}`,
-  );
-
   worker.postMessage({
     type: "init",
     iconData: workerIcons,
@@ -145,6 +139,7 @@ function init() {
     useInterpolation: settings.useInterpolation,
   });
 
+  isGameRunning = true;
   requestAnimationFrame(animateAll);
 }
 
@@ -177,18 +172,28 @@ canvas.addEventListener("click", (event) => {
 
 window.addEventListener("focus", () => {
   isWindowFocused = true;
+  const unfocusedNotice = document.getElementById(
+    "unfocusedNotice",
+  ) as HTMLDivElement;
 
   worker.postMessage({ type: "animate", time: performance.now() });
   worker.postMessage({ type: "pause", paused: false });
+  canvas.style.display = "flex";
+  if (isGameRunning) unfocusedNotice.style.display = "none";
 
   requestAnimationFrame(animateAll);
 });
 
 window.addEventListener("blur", () => {
   isWindowFocused = false;
+  const unfocusedNotice = document.getElementById(
+    "unfocusedNotice",
+  ) as HTMLDivElement;
 
   worker.postMessage({ type: "animate", time: performance.now() });
   worker.postMessage({ type: "pause", paused: true });
+  canvas.style.display = "none";
+  if (isGameRunning) unfocusedNotice.style.display = "block";
 });
 
 export { init };
