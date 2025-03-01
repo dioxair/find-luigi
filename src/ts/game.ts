@@ -1,5 +1,6 @@
 import { settings } from "./settings";
 import * as app from "./app";
+import AudioManager from "./audioManager";
 
 // this is so fucking stupid oh my god
 interface charImages {
@@ -36,6 +37,8 @@ const characterImages: charImages = {
   wario: new Image(),
   yoshi: new Image(),
 };
+
+const audioManager = new AudioManager();
 
 characterImages.luigi.src = "img/character/luigi.png";
 characterImages.mario.src = "img/character/mario.png";
@@ -163,6 +166,7 @@ canvas.addEventListener("click", (event) => {
       clickY <= y + height
     ) {
       if (characters[index].img === characterImages.luigi) {
+        audioManager.playRandomCaughtSound();
         points++;
         console.log("Points:", points);
       }
