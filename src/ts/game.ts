@@ -10,19 +10,36 @@ interface charImages {
   yoshi: HTMLImageElement;
 }
 
+interface CharacterInstance {
+  img: HTMLImageElement;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Character {
+  name: string;
+  width: number;
+  height: number;
+}
+
+interface workerIconInterface {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  width: number;
+  height: number;
+}
+
 const canvas: HTMLCanvasElement = document.getElementById(
   "gameCanvas",
 ) as HTMLCanvasElement;
 const ctx: CanvasRenderingContext2D = canvas.getContext(
   "2d",
 ) as CanvasRenderingContext2D;
-let characters: {
-  img: HTMLImageElement;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}[] = [];
+let characters: CharacterInstance[] = [];
 let worker = new Worker(
   new URL("./animation-worker.ts?worker&url", import.meta.url),
   { type: "module" },
@@ -63,26 +80,10 @@ function drawCharacters() {
   });
 }
 
-function init() {
-  canvas.width = app.gameOffsetWidth;
-  canvas.height = app.gameOffsetHeight;
-
-  const allCharacters = [
-    { name: "luigi", width: 60, height: 77 },
-    ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
-    ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
-    ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
-  ];
-
-  const minIcons = settings.minIcons;
-  const maxIcons = settings.maxIcons;
-  const iconCount =
-    Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
-
-  const workerIcons = [];
-  characters = [];
-
-  const character = allCharacters[0];
+function pushCharacter(
+  character: Character,
+  workerIcons: workerIconInterface[],
+) {
   const randomX = Math.random() * (canvas.width - character.width);
   const randomY = Math.random() * (canvas.height - character.height);
   const randomDx = (Math.random() - 0.5) * settings.speed;
@@ -104,33 +105,36 @@ function init() {
     width: character.width,
     height: character.height,
   });
+}
+
+function init() {
+  canvas.width = app.gameOffsetWidth;
+  canvas.height = app.gameOffsetHeight;
+
+  const allCharacters: Character[] = [
+    { name: "luigi", width: 60, height: 77 },
+    ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
+    ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
+    ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
+  ];
+
+  const minIcons = settings.minIcons;
+  const maxIcons = settings.maxIcons;
+  const iconCount =
+    Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
+
+  const workerIcons: workerIconInterface[] = [];
+  characters = [];
+
+  pushCharacter(allCharacters[0], workerIcons);
 
   for (let i = 0; i < iconCount; i++) {
     let character = allCharacters[i % allCharacters.length];
     if (character.name === "luigi") {
       character = allCharacters[(i + 1) % allCharacters.length];
     }
-    const randomX = Math.random() * (canvas.width - character.width);
-    const randomY = Math.random() * (canvas.height - character.height);
-    const randomDx = (Math.random() - 0.5) * settings.speed;
-    const randomDy = (Math.random() - 0.5) * settings.speed;
 
-    characters.push({
-      img: characterImages[character.name as keyof charImages],
-      x: randomX,
-      y: randomY,
-      width: character.width,
-      height: character.height,
-    });
-
-    workerIcons.push({
-      x: randomX,
-      y: randomY,
-      dx: randomDx,
-      dy: randomDy,
-      width: character.width,
-      height: character.height,
-    });
+    pushCharacter(character, workerIcons);
   }
 
   worker.postMessage({
