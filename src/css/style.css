@@ -37,6 +37,15 @@ body {
   position: relative;
 }
 
+/* This should scale the game to make it more playable for people on resolutions 1440p and up
+* not sure if thats a call i should make though since i dont have any displays with that resolution
+*/
+@media (min-width: 2560px), (min-height: 1440px) {
+  #game {
+    zoom: 130%;
+  }
+}
+
 @media (max-width: 960px), (max-height: 540px) {
   #game {
     zoom: 50%;
