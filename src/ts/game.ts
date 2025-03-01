@@ -2,12 +2,8 @@ import { settings } from "./settings";
 import * as app from "./app";
 import AudioManager from "./audioManager";
 
-// this is so fucking stupid oh my god
-interface charImages {
-  luigi: HTMLImageElement;
-  mario: HTMLImageElement;
-  wario: HTMLImageElement;
-  yoshi: HTMLImageElement;
+interface CharacterImages {
+  [key: string]: HTMLImageElement;
 }
 
 interface CharacterInstance {
@@ -18,13 +14,13 @@ interface CharacterInstance {
   height: number;
 }
 
-interface Character {
+interface CharacterConfig {
   name: string;
   width: number;
   height: number;
 }
 
-interface workerIconInterface {
+interface WorkerIcon {
   x: number;
   y: number;
   dx: number;
@@ -33,175 +29,169 @@ interface workerIconInterface {
   height: number;
 }
 
-const canvas: HTMLCanvasElement = document.getElementById(
-  "gameCanvas",
-) as HTMLCanvasElement;
-const ctx: CanvasRenderingContext2D = canvas.getContext(
-  "2d",
-) as CanvasRenderingContext2D;
-let characters: CharacterInstance[] = [];
-let worker = new Worker(
-  new URL("./animation-worker.ts?worker&url", import.meta.url),
-  { type: "module" },
-);
-let points = 0;
-let isWindowFocused = true;
-let isGameRunning = false;
+class Game {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private characters: CharacterInstance[] = [];
+  private worker: Worker;
+  private characterImages: CharacterImages = {};
+  private audioManager: AudioManager;
+  private points: number = 0;
+  private isWindowFocused: boolean = true;
 
-const characterImages: charImages = {
-  luigi: new Image(),
-  mario: new Image(),
-  wario: new Image(),
-  yoshi: new Image(),
-};
+  constructor(audioManager: AudioManager) {
+    this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+    this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.audioManager = audioManager;
+    this.worker = new Worker(
+      new URL("./animation-worker.ts?worker&url", import.meta.url),
+      { type: "module" },
+    );
 
-const audioManager = new AudioManager();
+    this.loadCharacterImages();
+    this.setupEventListeners();
+  }
 
-characterImages.luigi.src = "img/character/luigi.png";
-characterImages.mario.src = "img/character/mario.png";
-characterImages.wario.src = "img/character/wario.png";
-characterImages.yoshi.src = "img/character/yoshi.png";
-
-worker.onmessage = (event) => {
-  const { type, positions } = event.data;
-  if (type === "update") {
-    positions.forEach((position: { x: number; y: number }, index: number) => {
-      characters[index].x = position.x;
-      characters[index].y = position.y;
+  private loadCharacterImages() {
+    ["luigi", "mario", "wario", "yoshi"].forEach((name) => {
+      const img = new Image();
+      img.src = `img/character/${name}.png`;
+      this.characterImages[name] = img;
     });
-    drawCharacters();
   }
-};
 
-function drawCharacters() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  characters.forEach(({ img, x, y, width, height }) => {
-    ctx.drawImage(img, x, y, width, height);
-  });
-}
+  private setupEventListeners() {
+    this.worker.onmessage = this.handleWorkerMessage.bind(this);
+    this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
+    window.addEventListener("focus", this.handleWindowFocus.bind(this));
+    window.addEventListener("blur", this.handleWindowBlur.bind(this));
+  }
 
-function pushCharacter(
-  character: Character,
-  workerIcons: workerIconInterface[],
-) {
-  const randomX = Math.random() * (canvas.width - character.width);
-  const randomY = Math.random() * (canvas.height - character.height);
-  const randomDx = (Math.random() - 0.5) * settings.speed;
-  const randomDy = (Math.random() - 0.5) * settings.speed;
-
-  characters.push({
-    img: characterImages[character.name as keyof charImages],
-    x: randomX,
-    y: randomY,
-    width: character.width,
-    height: character.height,
-  });
-
-  workerIcons.push({
-    x: randomX,
-    y: randomY,
-    dx: randomDx,
-    dy: randomDy,
-    width: character.width,
-    height: character.height,
-  });
-}
-
-function init() {
-  canvas.width = app.gameOffsetWidth;
-  canvas.height = app.gameOffsetHeight;
-
-  const allCharacters: Character[] = [
-    { name: "luigi", width: 60, height: 77 },
-    ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
-    ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
-    ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
-  ];
-
-  const minIcons = settings.minIcons;
-  const maxIcons = settings.maxIcons;
-  const iconCount =
-    Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
-
-  const workerIcons: workerIconInterface[] = [];
-  characters = [];
-
-  pushCharacter(allCharacters[0], workerIcons);
-
-  for (let i = 0; i < iconCount; i++) {
-    let character = allCharacters[i % allCharacters.length];
-    if (character.name === "luigi") {
-      character = allCharacters[(i + 1) % allCharacters.length];
+  private handleWorkerMessage(event: MessageEvent) {
+    const { type, positions } = event.data;
+    if (type === "update") {
+      positions.forEach((position: { x: number; y: number }, index: number) => {
+        if (this.characters[index]) {
+          this.characters[index].x = position.x;
+          this.characters[index].y = position.y;
+        }
+      });
+      this.drawCharacters();
     }
-
-    pushCharacter(character, workerIcons);
   }
 
-  worker.postMessage({
-    type: "init",
-    iconData: workerIcons,
-    gameWidth: canvas.width,
-    gameHeight: canvas.height,
-    movementThreshold: settings.movementThreshold,
-    useInterpolation: settings.useInterpolation,
-  });
-
-  isGameRunning = true;
-  requestAnimationFrame(animateAll);
-}
-
-export function animateAll() {
-  if (isWindowFocused) {
-    worker.postMessage({ type: "animate", time: performance.now() });
-    requestAnimationFrame(animateAll);
+  private drawCharacters() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.characters.forEach(({ img, x, y, width, height }) => {
+      this.ctx.drawImage(img, x, y, width, height);
+    });
   }
-}
 
-canvas.addEventListener("click", (event) => {
-  const rect = canvas.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const clickY = event.clientY - rect.top;
+  private addCharacter(character: CharacterConfig, workerIcons: WorkerIcon[]) {
+    const randomX = Math.random() * (this.canvas.width - character.width);
+    const randomY = Math.random() * (this.canvas.height - character.height);
+    const randomDx = (Math.random() - 0.5) * settings.speed;
+    const randomDy = (Math.random() - 0.5) * settings.speed;
 
-  characters.forEach(({ x, y, width, height }, index) => {
-    if (
-      clickX >= x &&
-      clickX <= x + width &&
-      clickY >= y &&
-      clickY <= y + height
-    ) {
-      if (characters[index].img === characterImages.luigi) {
-        audioManager.playRandomCaughtSound();
-        points++;
-        console.log("Points:", points);
+    this.characters.push({
+      img: this.characterImages[character.name],
+      x: randomX,
+      y: randomY,
+      width: character.width,
+      height: character.height,
+    });
+
+    workerIcons.push({
+      x: randomX,
+      y: randomY,
+      dx: randomDx,
+      dy: randomDy,
+      width: character.width,
+      height: character.height,
+    });
+  }
+
+  public init() {
+    this.canvas.width = app.gameOffsetWidth;
+    this.canvas.height = app.gameOffsetHeight;
+
+    const availableCharacters: CharacterConfig[] = [
+      { name: "luigi", width: 60, height: 77 },
+      ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
+      ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
+      ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
+    ];
+
+    const minIcons = settings.minIcons;
+    const maxIcons = settings.maxIcons;
+    const iconCount =
+      Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
+    const workerIcons: WorkerIcon[] = [];
+    this.characters = [];
+
+    this.addCharacter(availableCharacters[0], workerIcons);
+
+    for (let i = 0; i < iconCount; i++) {
+      let character = availableCharacters[i % availableCharacters.length];
+      if (character.name === "luigi") {
+        character = availableCharacters[(i + 1) % availableCharacters.length];
       }
+      this.addCharacter(character, workerIcons);
     }
-  });
-});
 
-window.addEventListener("focus", () => {
-  isWindowFocused = true;
-  const unfocusedNotice = document.getElementById(
-    "unfocusedNotice",
-  ) as HTMLDivElement;
+    this.worker.postMessage({
+      type: "init",
+      iconData: workerIcons,
+      gameWidth: this.canvas.width,
+      gameHeight: this.canvas.height,
+      movementThreshold: settings.movementThreshold,
+      useInterpolation: settings.useInterpolation,
+    });
 
-  worker.postMessage({ type: "animate", time: performance.now() });
-  worker.postMessage({ type: "pause", paused: false });
-  canvas.style.display = "flex";
-  if (isGameRunning) unfocusedNotice.style.display = "none";
+    requestAnimationFrame(this.animateAll.bind(this));
+  }
 
-  requestAnimationFrame(animateAll);
-});
+  private handleCanvasClick(event: MouseEvent) {
+    const rect = this.canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
 
-window.addEventListener("blur", () => {
-  isWindowFocused = false;
-  const unfocusedNotice = document.getElementById(
-    "unfocusedNotice",
-  ) as HTMLDivElement;
+    this.characters.forEach(({ x, y, width, height, img }) => {
+      if (
+        clickX >= x &&
+        clickX <= x + width &&
+        clickY >= y &&
+        clickY <= y + height
+      ) {
+        if (img === this.characterImages.luigi) {
+          this.audioManager.playRandomCaughtSound();
+          this.points++;
+          console.log("Points:", this.points);
+        }
+      }
+    });
+  }
 
-  worker.postMessage({ type: "animate", time: performance.now() });
-  worker.postMessage({ type: "pause", paused: true });
-  canvas.style.display = "none";
-  if (isGameRunning) unfocusedNotice.style.display = "block";
-});
+  private handleWindowFocus() {
+    this.isWindowFocused = true;
+    document.getElementById("unfocusedNotice")!.style.display = "none";
+    this.worker.postMessage({ type: "pause", paused: false });
+    requestAnimationFrame(this.animateAll.bind(this));
+  }
 
-export { init };
+  private handleWindowBlur() {
+    this.isWindowFocused = false;
+    document.getElementById("unfocusedNotice")!.style.display = "block";
+    this.worker.postMessage({ type: "pause", paused: true });
+  }
+
+  public animateAll = () => {
+    if (this.isWindowFocused) {
+      this.worker.postMessage({ type: "animate", time: performance.now() });
+      requestAnimationFrame(this.animateAll);
+    }
+  };
+}
+
+const gameInstance = new Game(new AudioManager());
+export { gameInstance as Game };

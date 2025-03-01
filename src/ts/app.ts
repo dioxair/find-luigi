@@ -1,4 +1,4 @@
-import * as game from "./game";
+import { Game } from "./game";
 import { settings, applySettings } from "./settings";
 
 export let gameRect: DOMRect;
@@ -86,6 +86,6 @@ function start() {
   ).style.visibility = "hidden";
   (document.getElementById("music") as HTMLAudioElement).play();
 
-  game.init();
-  requestAnimationFrame(game.animateAll);
+  Game.init();
+  requestAnimationFrame(Game.animateAll);
 }
