@@ -39,6 +39,7 @@ class Game {
   private settings: Settings;
   private points: number = 0;
   private isWindowFocused: boolean = true;
+  private isGameRunning: boolean = false;
 
   constructor(audioManager: AudioManager, settingsManager: SettingsManager) {
     this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
@@ -150,6 +151,7 @@ class Game {
       useInterpolation: this.settings.useInterpolation,
     });
 
+    this.isGameRunning = true;
     requestAnimationFrame(this.animateAll.bind(this));
   }
 
@@ -176,14 +178,20 @@ class Game {
 
   private handleWindowFocus() {
     this.isWindowFocused = true;
-    document.getElementById("unfocusedNotice")!.style.display = "none";
+    if (this.isGameRunning) {
+      this.canvas.style.display = "flex";
+      document.getElementById("unfocusedNotice")!.style.display = "none";
+    }
     this.worker.postMessage({ type: "pause", paused: false });
     requestAnimationFrame(this.animateAll.bind(this));
   }
 
   private handleWindowBlur() {
     this.isWindowFocused = false;
-    document.getElementById("unfocusedNotice")!.style.display = "block";
+    if (this.isGameRunning) {
+      this.canvas.style.display = "none";
+      document.getElementById("unfocusedNotice")!.style.display = "block";
+    }
     this.worker.postMessage({ type: "pause", paused: true });
   }
 
