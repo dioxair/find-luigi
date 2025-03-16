@@ -1,6 +1,8 @@
 import { Game } from "./game";
-import { settings, applySettings } from "./settings";
+import { SettingsManager } from "./settings";
 
+const settingsManager = new SettingsManager();
+const settings = settingsManager.getSettings();
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
 export let gameOffsetHeight: number;
@@ -71,7 +73,7 @@ document
 document
   .getElementById("applySettingsButton")
   ?.addEventListener("click", () => {
-    applySettings();
+    settingsManager.applySettings();
 
     if (settings.music) {
       audioElement.muted = false;

@@ -1,6 +1,6 @@
-import { settings } from "./settings";
 import * as app from "./app";
 import AudioManager from "./audioManager";
+import { Settings, SettingsManager } from "./settings";
 
 interface CharacterImages {
   [key: string]: HTMLImageElement;
@@ -36,13 +36,15 @@ class Game {
   private worker: Worker;
   private characterImages: CharacterImages = {};
   private audioManager: AudioManager;
+  private settings: Settings;
   private points: number = 0;
   private isWindowFocused: boolean = true;
 
-  constructor(audioManager: AudioManager) {
+  constructor(audioManager: AudioManager, settingsManager: SettingsManager) {
     this.canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
     this.audioManager = audioManager;
+    this.settings = settingsManager.getSettings();
     this.worker = new Worker(
       new URL("./animation-worker.ts?worker&url", import.meta.url),
       { type: "module" },
@@ -90,8 +92,8 @@ class Game {
   private addCharacter(character: CharacterConfig, workerIcons: WorkerIcon[]) {
     const randomX = Math.random() * (this.canvas.width - character.width);
     const randomY = Math.random() * (this.canvas.height - character.height);
-    const randomDx = (Math.random() - 0.5) * settings.speed;
-    const randomDy = (Math.random() - 0.5) * settings.speed;
+    const randomDx = (Math.random() - 0.5) * this.settings.speed;
+    const randomDy = (Math.random() - 0.5) * this.settings.speed;
 
     this.characters.push({
       img: this.characterImages[character.name],
@@ -117,13 +119,13 @@ class Game {
 
     const availableCharacters: CharacterConfig[] = [
       { name: "luigi", width: 60, height: 77 },
-      ...(settings.useMario ? [{ name: "mario", width: 60, height: 69 }] : []),
-      ...(settings.useWario ? [{ name: "wario", width: 60, height: 64 }] : []),
-      ...(settings.useYoshi ? [{ name: "yoshi", width: 60, height: 83 }] : []),
-    ];
+      this.settings.useMario && { name: "mario", width: 60, height: 69 },
+      this.settings.useWario && { name: "wario", width: 60, height: 64 },
+      this.settings.useYoshi && { name: "yoshi", width: 60, height: 83 },
+    ].filter(Boolean) as CharacterConfig[];
 
-    const minIcons = settings.minIcons;
-    const maxIcons = settings.maxIcons;
+    const minIcons = this.settings.minIcons;
+    const maxIcons = this.settings.maxIcons;
     const iconCount =
       Math.floor(Math.random() * (maxIcons - minIcons + 1)) + minIcons;
     const workerIcons: WorkerIcon[] = [];
@@ -144,8 +146,8 @@ class Game {
       iconData: workerIcons,
       gameWidth: this.canvas.width,
       gameHeight: this.canvas.height,
-      movementThreshold: settings.movementThreshold,
-      useInterpolation: settings.useInterpolation,
+      movementThreshold: this.settings.movementThreshold,
+      useInterpolation: this.settings.useInterpolation,
     });
 
     requestAnimationFrame(this.animateAll.bind(this));
@@ -193,5 +195,5 @@ class Game {
   };
 }
 
-const gameInstance = new Game(new AudioManager());
+const gameInstance = new Game(new AudioManager(), new SettingsManager());
 export { gameInstance as Game };
