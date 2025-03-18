@@ -37,6 +37,7 @@ class Game {
   private characterImages: CharacterImages = {};
   private audioManager: AudioManager;
   private settings: Settings;
+  private animationFrameId: number = 0;
   private points: number = 0;
   private isWindowFocused: boolean = true;
   private isGameRunning: boolean = false;
@@ -64,8 +65,17 @@ class Game {
   }
 
   private setupEventListeners() {
-    this.worker.onmessage = this.handleWorkerMessage.bind(this);
+    if (!this.worker.onmessage) {
+      this.worker.onmessage = this.handleWorkerMessage.bind(this);
+    }
+
+    // stupid way of avoiding duplicate event listeners
+    this.canvas.removeEventListener("click", this.handleCanvasClick.bind(this));
     this.canvas.addEventListener("click", this.handleCanvasClick.bind(this));
+
+    window.removeEventListener("focus", this.handleWindowFocus.bind(this));
+    window.removeEventListener("blur", this.handleWindowBlur.bind(this));
+
     window.addEventListener("focus", this.handleWindowFocus.bind(this));
     window.addEventListener("blur", this.handleWindowBlur.bind(this));
   }
@@ -175,7 +185,6 @@ class Game {
           this.characters = this.characters.filter(
             (character) => character.img === this.characterImages.luigi,
           );
-
           this.drawCharacters();
 
           this.worker.postMessage({ type: "pause", paused: true });
@@ -187,7 +196,11 @@ class Game {
   }
 
   private restartGame() {
-    this.worker.terminate();
+    if (this.worker) {
+      this.worker.terminate();
+    }
+
+    cancelAnimationFrame(this.animationFrameId);
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -205,9 +218,9 @@ class Game {
     if (this.isGameRunning) {
       this.canvas.style.display = "flex";
       document.getElementById("unfocusedNotice")!.style.display = "none";
+      this.worker.postMessage({ type: "pause", paused: false });
+      requestAnimationFrame(this.animateAll.bind(this));
     }
-    this.worker.postMessage({ type: "pause", paused: false });
-    requestAnimationFrame(this.animateAll.bind(this));
   }
 
   private handleWindowBlur() {
@@ -222,7 +235,7 @@ class Game {
   public animateAll = () => {
     if (this.isWindowFocused) {
       this.worker.postMessage({ type: "animate", time: performance.now() });
-      requestAnimationFrame(this.animateAll);
+      this.animationFrameId = requestAnimationFrame(this.animateAll);
     }
   };
 }
