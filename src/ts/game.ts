@@ -167,13 +167,37 @@ class Game {
         clickY >= y &&
         clickY <= y + height
       ) {
-        if (img === this.characterImages.luigi) {
+        if (img === this.characterImages.luigi && this.isGameRunning) {
           this.audioManager.playRandomCaughtSound();
           this.points++;
           console.log("Points:", this.points);
+
+          this.characters = this.characters.filter(
+            (character) => character.img === this.characterImages.luigi,
+          );
+
+          this.drawCharacters();
+
+          this.worker.postMessage({ type: "pause", paused: true });
+          this.isGameRunning = false;
+          setTimeout(() => this.restartGame(), 3000);
         }
       }
     });
+  }
+
+  private restartGame() {
+    this.worker.terminate();
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.worker = new Worker(
+      new URL("./animation-worker.ts?worker&url", import.meta.url),
+      { type: "module" },
+    );
+
+    this.setupEventListeners();
+    this.init();
   }
 
   private handleWindowFocus() {
