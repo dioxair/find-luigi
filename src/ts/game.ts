@@ -152,6 +152,10 @@ class Game {
       this.addCharacter(character, workerIcons);
     }
 
+    if (this.settings.shuffleCharacterLayers) {
+      this.characters = this.shuffleArray<CharacterInstance>(this.characters);
+    }
+
     this.worker.postMessage({
       type: "init",
       iconData: workerIcons,
@@ -230,6 +234,15 @@ class Game {
       document.getElementById("unfocusedNotice")!.style.display = "block";
     }
     this.worker.postMessage({ type: "pause", paused: true });
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    // Fisher-Yates shuffle
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 
   public animateAll = () => {
