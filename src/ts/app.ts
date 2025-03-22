@@ -1,17 +1,15 @@
 import { Game } from "./game";
 import { SettingsManager } from "./settings";
+import AudioManager from "./audioManager";
 
 const settingsManager = new SettingsManager();
+const audioManager = new AudioManager();
 const settings = settingsManager.getSettings();
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
 export let gameOffsetHeight: number;
 // this is way too silly pls fix future me
 export let realFPS: number;
-
-const audioElement: HTMLAudioElement = document.getElementById(
-  "music",
-) as HTMLAudioElement;
 
 window.addEventListener("load", function () {
   const gameWindow = document.getElementById("game")!;
@@ -30,10 +28,8 @@ window.addEventListener("load", function () {
     gameWindow.style.minHeight = `${gameOffsetHeight}px`;
   });
 
-  if (settings.music) {
-    audioElement.muted = false;
-  } else {
-    audioElement.muted = true;
+  if (!settings.music) {
+    audioManager.muteMusic();
   }
 });
 
@@ -74,19 +70,13 @@ document
   .getElementById("applySettingsButton")
   ?.addEventListener("click", () => {
     settingsManager.applySettings();
-
-    if (settings.music) {
-      audioElement.muted = false;
-    } else {
-      audioElement.muted = true;
-    }
   });
 
 function start() {
   (
     document.getElementById("startButton") as HTMLButtonElement
   ).style.visibility = "hidden";
-  (document.getElementById("music") as HTMLAudioElement).play();
+  audioManager.playMusic();
 
   Game.init();
   requestAnimationFrame(Game.animateAll);
