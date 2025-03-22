@@ -166,7 +166,7 @@ class Game {
     });
 
     this.isGameRunning = true;
-    requestAnimationFrame(this.animateAll);
+    this.animationFrameId = requestAnimationFrame(this.animateAll);
   }
 
   private handleCanvasClick(event: MouseEvent) {
