@@ -6,6 +6,7 @@ export type Settings = {
   useInterpolation: boolean;
   showFPS: boolean;
   music: boolean;
+  SFX: boolean;
   movementThreshold: number;
   minIcons: number;
   maxIcons: number;
@@ -22,6 +23,7 @@ const settingsDefaults: Settings = {
   useInterpolation: false,
   showFPS: true,
   music: true,
+  SFX: true,
   movementThreshold: 1,
   minIcons: 50,
   maxIcons: 100,
@@ -56,6 +58,7 @@ export class SettingsManager {
       ) as HTMLInputElement,
       showFPS: document.getElementById("showFPSCheckbox") as HTMLInputElement,
       music: document.getElementById("musicCheckbox") as HTMLInputElement,
+      SFX: document.getElementById("sfxCheckbox") as HTMLInputElement,
       movementThreshold: document.getElementById(
         "movementThresholdField",
       ) as HTMLInputElement,

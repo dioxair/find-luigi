@@ -182,7 +182,9 @@ class Game {
         clickY <= y + height
       ) {
         if (img === this.characterImages.luigi && this.isGameRunning) {
-          this.audioManager.playRandomCaughtSound();
+          if (this.settings.SFX) {
+            this.audioManager.playRandomCaughtSound();
+          }
           this.points++;
           console.log("Points:", this.points);
 
