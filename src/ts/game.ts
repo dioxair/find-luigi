@@ -166,7 +166,7 @@ class Game {
     });
 
     this.isGameRunning = true;
-    requestAnimationFrame(this.animateAll.bind(this));
+    requestAnimationFrame(this.animateAll);
   }
 
   private handleCanvasClick(event: MouseEvent) {
@@ -223,7 +223,9 @@ class Game {
       this.canvas.style.display = "flex";
       document.getElementById("unfocusedNotice")!.style.display = "none";
       this.worker.postMessage({ type: "pause", paused: false });
-      requestAnimationFrame(this.animateAll.bind(this));
+
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = requestAnimationFrame(this.animateAll);
     }
   }
 
@@ -232,8 +234,8 @@ class Game {
     if (this.isGameRunning) {
       this.canvas.style.display = "none";
       document.getElementById("unfocusedNotice")!.style.display = "block";
+      this.worker.postMessage({ type: "pause", paused: true });
     }
-    this.worker.postMessage({ type: "pause", paused: true });
   }
 
   private shuffleArray<T>(array: T[]): T[] {

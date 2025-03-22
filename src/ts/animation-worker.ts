@@ -62,17 +62,16 @@ onmessage = (event) => {
 function updatePositions(currentTimestamp: number) {
   if (paused) return;
 
-  // Guard against time anomalies
+  if (lastTimestamp === null) {
+    lastTimestamp = currentTimestamp;
+    return;
+  }
+
   const maxDelta = 0.1;
   let deltaTime = (currentTimestamp - lastTimestamp!) / 1000;
 
   if (deltaTime > maxDelta) {
     deltaTime = maxDelta;
-  }
-
-  if (lastTimestamp === null) {
-    lastTimestamp = currentTimestamp;
-    return;
   }
 
   icons = icons.map((icon) => {
