@@ -40,7 +40,6 @@ onmessage = (event) => {
   } else if (type === "pause") {
     const wasPaused = paused;
     paused = data.paused;
-
     if (!paused && wasPaused) {
       lastTimestamp = null;
       icons = icons.map((icon) => ({
@@ -50,7 +49,6 @@ onmessage = (event) => {
         lastX: icon.x,
         lastY: icon.y,
       }));
-
       postMessage({
         type: "update",
         positions: icons.map((icon) => ({ x: icon.x, y: icon.y })),
@@ -69,28 +67,36 @@ function updatePositions(currentTimestamp: number) {
 
   const maxDelta = 0.1;
   let deltaTime = (currentTimestamp - lastTimestamp!) / 1000;
-
   if (deltaTime > maxDelta) {
     deltaTime = maxDelta;
   }
 
   icons = icons.map((icon) => {
+    if (icon.x <= 0 || icon.x >= gameWidth - icon.width) {
+      icon.dx *= -1;
+
+      if (icon.x <= 0) {
+        icon.x = 1;
+      } else if (icon.x >= gameWidth - icon.width) {
+        icon.x = gameWidth - icon.width - 1;
+      }
+    }
+
+    if (icon.y <= 0 || icon.y >= gameHeight - icon.height) {
+      icon.dy *= -1;
+
+      if (icon.y <= 0) {
+        icon.y = 1;
+      } else if (icon.y >= gameHeight - icon.height) {
+        icon.y = gameHeight - icon.height - 1;
+      }
+    }
+
     let newX = icon.x + icon.dx * deltaTime;
     let newY = icon.y + icon.dy * deltaTime;
 
-    // Boundary checks
     newX = Math.max(0, Math.min(newX, gameWidth - icon.width));
     newY = Math.max(0, Math.min(newY, gameHeight - icon.height));
-
-    // Bounce logic
-    if (newX <= 0 || newX >= gameWidth - icon.width) {
-      icon.dx *= -1;
-      newX = Math.max(0, Math.min(newX, gameWidth - icon.width));
-    }
-    if (newY <= 0 || newY >= gameHeight - icon.height) {
-      icon.dy *= -1;
-      newY = Math.max(0, Math.min(newY, gameHeight - icon.height));
-    }
 
     icon.x = newX;
     icon.y = newY;
@@ -115,7 +121,6 @@ function updatePositions(currentTimestamp: number) {
   });
 
   lastTimestamp = currentTimestamp;
-
   postMessage({
     type: "update",
     positions: icons.map((icon) => ({
