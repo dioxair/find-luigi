@@ -18,9 +18,11 @@ let lastTimestamp: number | null = null;
 let movementThreshold: number;
 let useInterpolation: boolean;
 let paused = false;
+let destroyed = false;
 const smoothingFactor = 0.1;
 
 onmessage = (event) => {
+  if (destroyed) return;
   const { type, ...data } = event.data;
 
   if (type === "init") {
@@ -56,6 +58,8 @@ onmessage = (event) => {
     }
   }
 };
+
+onmessageerror = () => (destroyed = true);
 
 function updatePositions(currentTimestamp: number) {
   if (paused) return;

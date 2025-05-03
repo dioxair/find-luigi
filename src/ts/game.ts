@@ -196,6 +196,12 @@ class Game {
         clickY <= y + height
       ) {
         if (img === this.characterImages.luigi && this.isGameRunning) {
+          cancelAnimationFrame(this.animationFrameId);
+          if (this.worker) {
+            this.worker.terminate();
+          }
+          this.isGameRunning = false;
+
           if (this.settings.SFX) {
             this.audioManager.playRandomCaughtSound();
           }
@@ -207,8 +213,7 @@ class Game {
           );
           this.drawCharacters();
 
-          this.worker.postMessage({ type: "pause", paused: true });
-          this.isGameRunning = false;
+          //this.worker.postMessage({ type: "pause", paused: true });
           setTimeout(() => this.restartGame(), 3000);
         }
       }
@@ -216,12 +221,6 @@ class Game {
   }
 
   private restartGame() {
-    if (this.worker) {
-      this.worker.terminate();
-    }
-
-    cancelAnimationFrame(this.animationFrameId);
-
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.worker = new Worker(
@@ -264,7 +263,7 @@ class Game {
   }
 
   public animateAll = () => {
-    if (this.isWindowFocused) {
+    if (this.isWindowFocused && this.isGameRunning) {
       this.worker.postMessage({ type: "animate", time: performance.now() });
       this.animationFrameId = requestAnimationFrame(this.animateAll);
     }
