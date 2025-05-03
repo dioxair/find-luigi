@@ -173,10 +173,20 @@ class Game {
 
   private handleCanvasClick(event: MouseEvent) {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-    const clickX = (event.clientX - rect.left) * scaleX;
-    const clickY = (event.clientY - rect.top) * scaleY;
+    const canvasWidth = this.canvas.width;
+    const canvasHeight = this.canvas.height;
+
+    const scaleRatio = Math.min(
+      rect.width / canvasWidth,
+      rect.height / canvasHeight,
+    );
+    const scaledWidth = canvasWidth * scaleRatio;
+    const scaledHeight = canvasHeight * scaleRatio;
+    const offsetX = (rect.width - scaledWidth) / 2;
+    const offsetY = (rect.height - scaledHeight) / 2;
+
+    const clickX = (event.clientX - rect.left - offsetX) / scaleRatio;
+    const clickY = (event.clientY - rect.top - offsetY) / scaleRatio;
 
     this.characters.forEach(({ x, y, width, height, img }) => {
       if (
