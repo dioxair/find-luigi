@@ -76,7 +76,6 @@ body {
 
 /* This should scale the game to make it more playable for people on resolutions 1440p and up
 * not sure if thats a call i should make though since i dont have any displays with that resolution
-*/
 @media (min-width: 2560px), (min-height: 1440px) {
   #game {
     zoom: 130%;
@@ -88,6 +87,7 @@ body {
     zoom: 50%;
   }
 }
+*/
 
 #startButton {
   font-family: "JetBrains Mono", monospace;
