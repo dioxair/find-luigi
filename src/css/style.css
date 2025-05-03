@@ -27,14 +27,51 @@ body {
 }
 
 #game {
-  --r: 960 / 540;
+  --r: 16 / 9;
   aspect-ratio: var(--r);
-  width: min(90%, min(960px, 90vh * (var(--r))));
+  width: 90vw;
+  max-width: 960px;
   transform-origin: center;
   display: flex;
+  justify-content: center;
+  align-items: center;
   margin: auto;
   flex: 1;
   position: relative;
+  background-color: black;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  display: block;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+#game:-webkit-full-screen,
+#game:-moz-full-screen,
+#game:-ms-fullscreen,
+#game:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  margin: 0;
+}
+
+#game:-webkit-full-screen #gameCanvas,
+#game:-moz-full-screen #gameCanvas,
+#game:-ms-fullscreen #gameCanvas,
+#game:fullscreen #gameCanvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* This should scale the game to make it more playable for people on resolutions 1440p and up
@@ -75,6 +112,28 @@ body {
   border-color: #505050;
 }
 
+#fullscreenButton {
+  font-family: "JetBrains Mono", monospace;
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  font-size: 1em;
+  z-index: 10;
+  padding: 5px 10px;
+  background: rgba(32, 32, 32, 0.6);
+  color: white;
+  border: 1px solid rgba(64, 64, 64, 0.8);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+
+#fullscreenButton:hover {
+  background: rgba(48, 48, 48, 0.7);
+  border-color: rgba(80, 80, 80, 0.9);
+}
+
 #unfocusedNotice {
   display: none;
   font-family: "JetBrains Mono", monospace;
@@ -107,7 +166,7 @@ body {
   margin: auto;
   max-width: 30%;
   max-height: 30%;
-  padding: 15px 30px;
+  padding: 10px 20px;
   background: #202020;
   color: white;
   border: 2px solid #404040;

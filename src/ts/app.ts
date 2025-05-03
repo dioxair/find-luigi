@@ -11,22 +11,14 @@ export let gameOffsetHeight: number;
 // this is way too silly pls fix future me
 export let realFPS: number;
 
-window.addEventListener("load", function () {
-  const gameWindow = document.getElementById("game")!;
+const gameWindow = document.getElementById("game")!;
+const fullscreenButton = document.getElementById(
+  "fullscreenButton",
+) as HTMLButtonElement;
 
+window.addEventListener("load", function () {
   gameOffsetWidth = gameWindow.offsetWidth;
   gameOffsetHeight = gameWindow.offsetHeight;
-
-  window.addEventListener("resize", function () {
-    gameRect = gameWindow.getBoundingClientRect();
-    gameOffsetWidth = gameWindow.offsetWidth;
-    gameOffsetHeight = gameWindow.offsetHeight;
-
-    gameWindow.style.width = `${gameOffsetWidth}px`;
-    gameWindow.style.height = `${gameOffsetHeight}px`;
-    gameWindow.style.minWidth = `${gameOffsetWidth}px`;
-    gameWindow.style.minHeight = `${gameOffsetHeight}px`;
-  });
 
   if (!settings.music) {
     audioManager.muteMusic();
@@ -63,6 +55,45 @@ setInterval(() => {
 
 fpsCounter();
 
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    if (gameWindow.requestFullscreen) {
+      gameWindow.requestFullscreen();
+    } else if ((gameWindow as any).mozRequestFullScreen) {
+      (gameWindow as any).mozRequestFullScreen();
+    } else if ((gameWindow as any).webkitRequestFullscreen) {
+      (gameWindow as any).webkitRequestFullscreen();
+    } else if ((gameWindow as any).msRequestFullscreen) {
+      (gameWindow as any).msRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).mozCancelFullScreen) {
+      (document as any).mozCancelFullScreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    }
+  }
+}
+
+function updateFullscreenButton() {
+  if (document.fullscreenElement) {
+    fullscreenButton.textContent = "Exit Fullscreen";
+  } else {
+    fullscreenButton.textContent = "Fullscreen";
+  }
+}
+
+fullscreenButton?.addEventListener("click", toggleFullscreen);
+
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+document.addEventListener("mozfullscreenchange", updateFullscreenButton);
+document.addEventListener("MSFullscreenChange", updateFullscreenButton);
+
 document
   .getElementById("startButton")
   ?.addEventListener("click", () => start());
@@ -79,5 +110,4 @@ function start() {
   audioManager.playMusic();
 
   Game.init();
-  requestAnimationFrame(Game.animateAll);
 }

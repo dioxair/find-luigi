@@ -1,4 +1,4 @@
-import * as app from "./app";
+//import * as app from "./app";
 import AudioManager from "./audioManager";
 import { Settings, SettingsManager } from "./settings";
 
@@ -125,8 +125,10 @@ class Game {
   }
 
   public init() {
-    this.canvas.width = app.gameOffsetWidth;
-    this.canvas.height = app.gameOffsetHeight;
+    this.canvas.width = 960;
+    this.canvas.height = 540;
+    this.canvas.style.width = "100%";
+    this.canvas.style.height = "100%";
 
     const availableCharacters: CharacterConfig[] = [
       { name: "luigi", width: 60, height: 77 },
