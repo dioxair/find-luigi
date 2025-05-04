@@ -316,8 +316,8 @@ footer {
   width: auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   position: fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: 20px;
+  left: 20px;
 }
 
 #icon-links {
