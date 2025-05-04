@@ -242,3 +242,32 @@ body {
   height: 18px;
   margin: 0;
 }
+
+footer {
+  display: flex;
+  background-color: #151515;
+  color: #808080;
+  text-align: left;
+  padding: 10px;
+  border-radius: 8px;
+  margin: auto;
+  width: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+}
+
+#icon-links {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+#icon-links a svg {
+  transition: transform 0.2s ease-in-out;
+}
+
+#icon-links a:hover svg {
+  transform: scale(1.1);
+}

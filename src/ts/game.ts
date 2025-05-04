@@ -1,4 +1,3 @@
-//import * as app from "./app";
 import AudioManager from "./audioManager";
 import { Settings, SettingsManager } from "./settings";
 
