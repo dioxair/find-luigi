@@ -59,13 +59,10 @@ window.addEventListener("load", async function () {
     const infoIcon = icon as HTMLImageElement;
     if (infoIcon.title) {
       infoIcon.addEventListener("click", (event) => {
-        const isMobile = window.matchMedia("(max-width: 768px)").matches;
-        if (isMobile) {
-          event.preventDefault();
-          event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
 
-          showCustomAlert(infoIcon.title);
-        }
+        showCustomAlert(infoIcon.title);
       });
     }
   });

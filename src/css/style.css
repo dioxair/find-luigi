@@ -243,22 +243,20 @@ body {
   margin: 0;
 }
 
-@media (max-width: 768px) {
-  .info-label .label-info-icon {
-    pointer-events: auto;
-    cursor: pointer;
-  }
+.info-label .label-info-icon {
+  pointer-events: auto;
+  cursor: pointer;
+}
 
-  .info-label .label-info-icon[title]:hover::after {
-    content: none;
-  }
+.info-label .label-info-icon[title]:hover::after {
+  content: none;
+}
 
-  .info-label .label-info-icon[title] {
-    pointer-events: auto;
-  }
-  .info-label .label-info-icon[title]:hover::after {
-    content: none !important;
-  }
+.info-label .label-info-icon[title] {
+  pointer-events: auto;
+}
+.info-label .label-info-icon[title]:hover::after {
+  content: none !important;
 }
 
 #customAlertOverlay {
