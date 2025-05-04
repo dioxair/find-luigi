@@ -271,5 +271,4 @@ class Game {
   };
 }
 
-const gameInstance = new Game(new AudioManager(), new SettingsManager());
-export { gameInstance as Game };
+export { Game };

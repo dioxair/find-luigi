@@ -5,6 +5,7 @@ import AudioManager from "./audioManager";
 const settingsManager = new SettingsManager();
 const audioManager = new AudioManager();
 const settings = settingsManager.getSettings();
+let gameInstance: Game;
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
 export let gameOffsetHeight: number;
@@ -16,13 +17,17 @@ const fullscreenButton = document.getElementById(
   "fullscreenButton",
 ) as HTMLButtonElement;
 
-window.addEventListener("load", function () {
+window.addEventListener("load", async function () {
   gameOffsetWidth = gameWindow.offsetWidth;
   gameOffsetHeight = gameWindow.offsetHeight;
 
+  await audioManager.loadAll();
+
   if (!settings.music) {
-    audioManager.muteMusic();
+    audioManager.setVolume("music", 0);
   }
+
+  gameInstance = new Game(audioManager, settingsManager);
 });
 
 const times: number[] = [];
@@ -103,11 +108,15 @@ document
     settingsManager.applySettings();
   });
 
-function start() {
+async function start() {
   (
     document.getElementById("startButton") as HTMLButtonElement
   ).style.visibility = "hidden";
-  audioManager.playMusic();
 
-  Game.init();
+  const played = await audioManager.play("music");
+  if (!played) {
+    console.warn("Music did not start");
+  }
+
+  gameInstance.init();
 }
