@@ -17,6 +17,32 @@ const fullscreenButton = document.getElementById(
   "fullscreenButton",
 ) as HTMLButtonElement;
 
+const customAlertOverlay = document.getElementById(
+  "customAlertOverlay",
+) as HTMLDivElement;
+const customAlertText = document.getElementById(
+  "customAlertText",
+) as HTMLParagraphElement;
+const customAlertCloseButton = document.getElementById(
+  "customAlertClose",
+) as HTMLButtonElement;
+
+function showCustomAlert(text: string) {
+  customAlertText.textContent = text;
+  customAlertOverlay.style.display = "flex";
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+}
+
+function hideCustomAlert() {
+  customAlertOverlay.style.display = "none";
+  customAlertText.textContent = "";
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+}
+
+customAlertCloseButton.addEventListener("click", hideCustomAlert);
+
 window.addEventListener("load", async function () {
   gameOffsetWidth = gameWindow.offsetWidth;
   gameOffsetHeight = gameWindow.offsetHeight;
@@ -26,6 +52,23 @@ window.addEventListener("load", async function () {
   if (!settings.music) {
     audioManager.setVolume("music", 0);
   }
+
+  const infoIcons = document.querySelectorAll(".info-label .label-info-icon");
+
+  infoIcons.forEach((icon) => {
+    const infoIcon = icon as HTMLImageElement;
+    if (infoIcon.title) {
+      infoIcon.addEventListener("click", (event) => {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        if (isMobile) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          showCustomAlert(infoIcon.title);
+        }
+      });
+    }
+  });
 
   gameInstance = new Game(audioManager, settingsManager);
 });
