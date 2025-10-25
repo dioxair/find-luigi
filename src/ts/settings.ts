@@ -18,7 +18,7 @@ type InputElements = { [Key in keyof Settings]: HTMLInputElement };
 const settingsDefaults: Settings = {
   useMario: true,
   useWario: true,
-  useYoshi: false,
+  useYoshi: true,
   shuffleCharacterLayers: true,
   useInterpolation: false,
   showFPS: true,
