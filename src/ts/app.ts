@@ -5,7 +5,8 @@ import AudioManager from "./audioManager";
 const settingsManager = new SettingsManager();
 const audioManager = new AudioManager();
 const settings = settingsManager.getSettings();
-let gameInstance: Game;
+let gameInstance: Game | null = null;
+let initializationPromise: Promise<void> | null = null;
 export let gameRect: DOMRect;
 export let gameOffsetWidth: number;
 export let gameOffsetHeight: number;
@@ -16,6 +17,9 @@ const gameWindow = document.getElementById("game")!;
 const fullscreenButton = document.getElementById(
   "fullscreenButton",
 ) as HTMLButtonElement;
+const startButton = document.getElementById(
+  "startButton",
+) as HTMLButtonElement | null;
 
 const customAlertOverlay = document.getElementById(
   "customAlertOverlay",
@@ -43,31 +47,54 @@ function hideCustomAlert() {
 
 customAlertCloseButton.addEventListener("click", hideCustomAlert);
 
-window.addEventListener("load", async function () {
-  gameOffsetWidth = gameWindow.offsetWidth;
-  gameOffsetHeight = gameWindow.offsetHeight;
-
-  await audioManager.loadAll();
-
-  if (!settings.music) {
-    audioManager.setVolume("music", 0);
+async function initializeGame(): Promise<void> {
+  if (gameInstance) {
+    return;
   }
 
-  const infoIcons = document.querySelectorAll(".info-label .label-info-icon");
+  if (!initializationPromise) {
+    initializationPromise = (async () => {
+      gameOffsetWidth = gameWindow.offsetWidth;
+      gameOffsetHeight = gameWindow.offsetHeight;
 
-  infoIcons.forEach((icon) => {
-    const infoIcon = icon as HTMLImageElement;
-    if (infoIcon.title) {
-      infoIcon.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+      await audioManager.loadAll();
 
-        showCustomAlert(infoIcon.title);
+      if (!settings.music) {
+        audioManager.setVolume("music", 0);
+      }
+
+      const infoIcons = document.querySelectorAll(
+        ".info-label .label-info-icon",
+      );
+
+      infoIcons.forEach((icon) => {
+        const infoIcon = icon as HTMLImageElement;
+        if (infoIcon.title) {
+          infoIcon.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            showCustomAlert(infoIcon.title);
+          });
+        }
       });
-    }
-  });
 
-  gameInstance = new Game(audioManager, settingsManager);
+      gameInstance = new Game(audioManager, settingsManager);
+    })();
+
+    initializationPromise.catch((error) => {
+      initializationPromise = null;
+      console.error("Failed to initialize game", error);
+    });
+  }
+
+  await initializationPromise;
+}
+
+window.addEventListener("load", () => {
+  initializeGame().catch((error) => {
+    console.error("Unable to initialize game on load", error);
+  });
 });
 
 const times: number[] = [];
@@ -139,9 +166,7 @@ document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
 document.addEventListener("mozfullscreenchange", updateFullscreenButton);
 document.addEventListener("MSFullscreenChange", updateFullscreenButton);
 
-document
-  .getElementById("startButton")
-  ?.addEventListener("click", () => start());
+startButton?.addEventListener("click", () => start());
 document
   .getElementById("applySettingsButton")
   ?.addEventListener("click", () => {
@@ -149,13 +174,32 @@ document
   });
 
 async function start() {
-  (
-    document.getElementById("startButton") as HTMLButtonElement
-  ).style.visibility = "hidden";
+  if (!startButton) {
+    return;
+  }
+
+  startButton.disabled = true;
+
+  try {
+    await initializeGame();
+  } catch (error) {
+    startButton.disabled = false;
+    console.error("Start aborted due to initialization failure", error);
+    return;
+  }
+
+  startButton.style.visibility = "hidden";
 
   const played = await audioManager.play("music");
   if (!played) {
     console.warn("Music did not start");
+  }
+
+  if (!gameInstance) {
+    console.error("Game instance missing after initialization");
+    startButton.disabled = false;
+    startButton.style.visibility = "visible";
+    return;
   }
 
   gameInstance.init();
