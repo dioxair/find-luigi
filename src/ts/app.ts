@@ -2,205 +2,240 @@ import { Game } from "./game";
 import { SettingsManager } from "./settings";
 import AudioManager from "./audioManager";
 
-const settingsManager = new SettingsManager();
-const audioManager = new AudioManager();
-const settings = settingsManager.getSettings();
-let gameInstance: Game | null = null;
-let initializationPromise: Promise<void> | null = null;
-export let gameRect: DOMRect;
-export let gameOffsetWidth: number;
-export let gameOffsetHeight: number;
-// this is way too silly pls fix future me
-export let realFPS: number;
+// TODO: this is way too silly pls fix future me
+let realFPS: number;
 
-const gameWindow = document.getElementById("game")!;
-const fullscreenButton = document.getElementById(
-  "fullscreenButton",
-) as HTMLButtonElement;
-const startButton = document.getElementById(
-  "startButton",
-) as HTMLButtonElement | null;
-
-const customAlertOverlay = document.getElementById(
-  "customAlertOverlay",
-) as HTMLDivElement;
-const customAlertText = document.getElementById(
-  "customAlertText",
-) as HTMLParagraphElement;
-const customAlertCloseButton = document.getElementById(
-  "customAlertClose",
-) as HTMLButtonElement;
-
-function showCustomAlert(text: string) {
-  customAlertText.textContent = text;
-  customAlertOverlay.style.display = "flex";
-  document.documentElement.style.overflow = "hidden";
-  document.body.style.overflow = "hidden";
+interface AppElements {
+  gameWindow: HTMLDivElement;
+  fullscreenButton: HTMLButtonElement;
+  startButton: HTMLButtonElement;
+  fpsCounter: HTMLParagraphElement;
+  customAlertOverlay: HTMLDivElement;
+  customAlertText: HTMLParagraphElement;
+  customAlertClose: HTMLButtonElement;
+  applySettingsButton: HTMLButtonElement;
 }
 
-function hideCustomAlert() {
-  customAlertOverlay.style.display = "none";
-  customAlertText.textContent = "";
-  document.documentElement.style.overflow = "";
-  document.body.style.overflow = "";
-}
+class App {
+  private readonly settingsManager = new SettingsManager();
+  private readonly audioManager = new AudioManager();
+  private readonly settings = this.settingsManager.getSettings();
+  private gameInstance: Game | null = null;
+  private initializationPromise: Promise<void> | null = null;
+  private readonly fpsSamples: number[] = [];
+  private fps = 0;
+  private readonly elements: AppElements;
 
-customAlertCloseButton.addEventListener("click", hideCustomAlert);
+  constructor() {
+    this.elements = this.getElements();
+    this.registerAlertHandlers();
+    this.registerStartHandler();
+    this.registerSettingsHandler();
+    this.registerFullscreenHandlers();
+    this.startFpsTracking();
 
-async function initializeGame(): Promise<void> {
-  if (gameInstance) {
-    return;
-  }
-
-  if (!initializationPromise) {
-    initializationPromise = (async () => {
-      gameOffsetWidth = gameWindow.offsetWidth;
-      gameOffsetHeight = gameWindow.offsetHeight;
-
-      await audioManager.loadAll();
-
-      if (!settings.music) {
-        audioManager.setVolume("music", 0);
-      }
-
-      const infoIcons = document.querySelectorAll(
-        ".info-label .label-info-icon",
-      );
-
-      infoIcons.forEach((icon) => {
-        const infoIcon = icon as HTMLImageElement;
-        if (infoIcon.title) {
-          infoIcon.addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            showCustomAlert(infoIcon.title);
-          });
-        }
+    window.addEventListener("load", () => {
+      this.initialize().catch((error) => {
+        console.error("Unable to initialize game on load", error);
       });
-
-      gameInstance = new Game(audioManager, settingsManager);
-    })();
-
-    initializationPromise.catch((error) => {
-      initializationPromise = null;
-      console.error("Failed to initialize game", error);
     });
   }
 
-  await initializationPromise;
-}
-
-window.addEventListener("load", () => {
-  initializeGame().catch((error) => {
-    console.error("Unable to initialize game on load", error);
-  });
-});
-
-const times: number[] = [];
-let fps: number;
-const fpsCounterElement: HTMLParagraphElement = document.getElementById(
-  "fpsCounter",
-) as HTMLParagraphElement;
-
-function fpsCounter() {
-  requestAnimationFrame(() => {
-    const now = performance.now();
-    while (times.length > 0 && times[0] <= now - 1000) {
-      times.shift();
-    }
-    times.push(now);
-    fps = times.length;
-    fpsCounter();
-  });
-}
-
-setInterval(() => {
-  realFPS = fps;
-  if (settings.showFPS) {
-    fpsCounterElement.hidden = false;
-    fpsCounterElement.textContent = `FPS: ${realFPS}`;
-  } else {
-    fpsCounterElement.hidden = true;
+  private getElements(): AppElements {
+    return {
+      gameWindow: this.requireElement<HTMLDivElement>("game"),
+      fullscreenButton:
+        this.requireElement<HTMLButtonElement>("fullscreenButton"),
+      startButton: this.requireElement<HTMLButtonElement>("startButton"),
+      fpsCounter: this.requireElement<HTMLParagraphElement>("fpsCounter"),
+      customAlertOverlay:
+        this.requireElement<HTMLDivElement>("customAlertOverlay"),
+      customAlertText:
+        this.requireElement<HTMLParagraphElement>("customAlertText"),
+      customAlertClose:
+        this.requireElement<HTMLButtonElement>("customAlertClose"),
+      applySettingsButton: this.requireElement<HTMLButtonElement>(
+        "applySettingsButton",
+      ),
+    };
   }
-}, 1000);
 
-fpsCounter();
+  private requireElement<T extends HTMLElement>(id: string): T {
+    const element = document.getElementById(id) as T | null;
+    if (!element) {
+      throw new Error(`Missing element with id "${id}"`);
+    }
+    return element;
+  }
 
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    if (gameWindow.requestFullscreen) {
+  private registerAlertHandlers(): void {
+    this.elements.customAlertClose.addEventListener("click", () =>
+      this.hideCustomAlert(),
+    );
+  }
+
+  private registerStartHandler(): void {
+    this.elements.startButton.addEventListener("click", () =>
+      this.handleStartClick(),
+    );
+  }
+
+  private registerSettingsHandler(): void {
+    this.elements.applySettingsButton.addEventListener("click", () =>
+      this.settingsManager.applySettings(),
+    );
+  }
+
+  private registerFullscreenHandlers(): void {
+    this.elements.fullscreenButton.addEventListener("click", () =>
+      this.toggleFullscreen(),
+    );
+
+    document.addEventListener("fullscreenchange", () =>
+      this.updateFullscreenButton(),
+    );
+
+    this.updateFullscreenButton();
+  }
+
+  private startFpsTracking(): void {
+    this.trackFpsSamples();
+    const FPS_UPDATE_INTERVAL_MS = 1000;
+    setInterval(() => this.updateFpsDisplay(), FPS_UPDATE_INTERVAL_MS);
+  }
+
+  private trackFpsSamples(): void {
+    requestAnimationFrame(() => {
+      const now = performance.now();
+      while (this.fpsSamples.length > 0 && this.fpsSamples[0] <= now - 1000) {
+        this.fpsSamples.shift();
+      }
+      this.fpsSamples.push(now);
+      this.fps = this.fpsSamples.length;
+      this.trackFpsSamples();
+    });
+  }
+
+  private updateFpsDisplay(): void {
+    realFPS = this.fps;
+    const { fpsCounter } = this.elements;
+
+    if (this.settings.showFPS) {
+      fpsCounter.hidden = false;
+      fpsCounter.textContent = `FPS: ${realFPS}`;
+    } else {
+      fpsCounter.hidden = true;
+    }
+  }
+
+  private async initialize(): Promise<void> {
+    if (this.gameInstance) {
+      return;
+    }
+
+    if (!this.initializationPromise) {
+      this.initializationPromise = this.prepareGame().catch((error) => {
+        this.initializationPromise = null;
+        console.error("Failed to initialize game", error);
+        throw error;
+      });
+    }
+
+    await this.initializationPromise;
+  }
+
+  private async prepareGame(): Promise<void> {
+    await this.audioManager.loadAll();
+
+    if (!this.settings.music) {
+      // TODO: implement muting and unmuting individual sounds
+      this.audioManager.setVolume("music", 0);
+    }
+
+    this.attachInfoIconHandlers();
+    this.gameInstance = new Game(this.audioManager, this.settingsManager);
+  }
+
+  private attachInfoIconHandlers(): void {
+    document.querySelectorAll(".info-label .label-info-icon").forEach((iconNode) => {
+      const icon = iconNode as HTMLImageElement;
+      if (!icon.title) {
+        return;
+      }
+
+      icon.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.showCustomAlert(icon.title);
+      });
+    });
+  }
+
+  private async handleStartClick(): Promise<void> {
+    const { startButton } = this.elements;
+    if (startButton.disabled) {
+      return;
+    }
+
+    startButton.disabled = true;
+
+    try {
+      await this.initialize();
+    } catch (error) {
+      startButton.disabled = false;
+      console.error("Start aborted due to initialization failure", error);
+      return;
+    }
+
+    startButton.style.visibility = "hidden";
+
+    const played = await this.audioManager.play("music");
+    if (!played) {
+      console.warn("Music did not start");
+    }
+
+    if (!this.gameInstance) {
+      startButton.disabled = false;
+      startButton.style.visibility = "visible";
+      console.error("Game instance missing after initialization");
+      return;
+    }
+
+    this.gameInstance.init();
+  }
+
+  private toggleFullscreen(): void {
+    const { gameWindow } = this.elements;
+
+    if (!document.fullscreenElement) {
       gameWindow.requestFullscreen();
-    } else if ((gameWindow as any).mozRequestFullScreen) {
-      (gameWindow as any).mozRequestFullScreen();
-    } else if ((gameWindow as any).webkitRequestFullscreen) {
-      (gameWindow as any).webkitRequestFullscreen();
-    } else if ((gameWindow as any).msRequestFullscreen) {
-      (gameWindow as any).msRequestFullscreen();
+      return;
     }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if ((document as any).mozCancelFullScreen) {
-      (document as any).mozCancelFullScreen();
-    } else if ((document as any).webkitExitFullscreen) {
-      (document as any).webkitExitFullscreen();
-    } else if ((document as any).msExitFullscreen) {
-      (document as any).msExitFullscreen();
-    }
+    document.exitFullscreen();
+  }
+
+  private updateFullscreenButton(): void {
+    const { fullscreenButton } = this.elements;
+    fullscreenButton.textContent = document.fullscreenElement
+      ? "Exit Fullscreen"
+      : "Fullscreen";
+  }
+
+  private showCustomAlert(text: string): void {
+    const { customAlertOverlay, customAlertText } = this.elements;
+    customAlertText.textContent = text;
+    customAlertOverlay.style.display = "flex";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+  }
+
+  private hideCustomAlert(): void {
+    const { customAlertOverlay, customAlertText } = this.elements;
+    customAlertOverlay.style.display = "none";
+    customAlertText.textContent = "";
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
   }
 }
 
-function updateFullscreenButton() {
-  if (document.fullscreenElement) {
-    fullscreenButton.textContent = "Exit Fullscreen";
-  } else {
-    fullscreenButton.textContent = "Fullscreen";
-  }
-}
-
-fullscreenButton?.addEventListener("click", toggleFullscreen);
-
-document.addEventListener("fullscreenchange", updateFullscreenButton);
-document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
-document.addEventListener("mozfullscreenchange", updateFullscreenButton);
-document.addEventListener("MSFullscreenChange", updateFullscreenButton);
-
-startButton?.addEventListener("click", () => start());
-document
-  .getElementById("applySettingsButton")
-  ?.addEventListener("click", () => {
-    settingsManager.applySettings();
-  });
-
-async function start() {
-  if (!startButton) {
-    return;
-  }
-
-  startButton.disabled = true;
-
-  try {
-    await initializeGame();
-  } catch (error) {
-    startButton.disabled = false;
-    console.error("Start aborted due to initialization failure", error);
-    return;
-  }
-
-  startButton.style.visibility = "hidden";
-
-  const played = await audioManager.play("music");
-  if (!played) {
-    console.warn("Music did not start");
-  }
-
-  if (!gameInstance) {
-    console.error("Game instance missing after initialization");
-    startButton.disabled = false;
-    startButton.style.visibility = "visible";
-    return;
-  }
-
-  gameInstance.init();
-}
+new App();
